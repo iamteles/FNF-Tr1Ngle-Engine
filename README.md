@@ -1,5 +1,7 @@
 # Friday Night Funkin': Tr1Ngle Engine
 
+![](assets/preload/images/logoSingle.png)
+
 Features:
 		
 	Misses info;
@@ -32,11 +34,14 @@ Features:
 
 
 Credits:
-	Friday Night Funkin'
+
+	Friday Night Funkin' -
+
 		ninjamuffin99 - Programming
 		PhantomArcade3K and Evilsk8r - Art
 		Kawai Sprite - Music
-	This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
+
+	       This game was made with love to Newgrounds and its community. Extra love to Tom Fulp;
 	
 	Astro_Galaxy - BF and GF new sprites;
 	Teles - Miss sprite;
@@ -48,7 +53,7 @@ Build:
 		# Install project dependencies
 	- haxelib install actuate
   	- haxelib install lime 7.9.0
-  	- haxelib install openfl 
+  	- haxelib install openfl
   	- haxelib install flixel
   	- haxelib run lime setup flixel
   	- haxelib run lime setup
@@ -63,5 +68,7 @@ Build:
   	- haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
   	- haxelib install linc_luajit
 
-  	build:
+
+build:
+
   		run build-windows-if-crash.bat or build-windows.bat;
