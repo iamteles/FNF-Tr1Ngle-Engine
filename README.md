@@ -2,6 +2,10 @@
 
 ![](assets/preload/images/logoSingle.png)
 
+![GitHub all releases](https://img.shields.io/github/downloads/Tr1NgleDev/Tr1Ngle-Engine/total?style=flat-square) 
+
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Tr1NgleDev/Tr1Ngle-Engine?label=latest-version&style=flat-square)
+
 Features:
 		
 	Misses info;
