@@ -34,6 +34,8 @@ Features:
 	
 	Colors for Health Bar;
 
+	Freeplay BG color changing for each song;
+
 	And More;
 
 
