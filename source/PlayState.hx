@@ -3004,6 +3004,41 @@ class PlayState extends MusicBeatState
 		{
 			// dad.dance();
 		}
+
+		//for events like shaders
+		switch (SONG.song.toLowerCase()) 
+		{
+
+			/* 
+
+			// example of using chromatic aberration shaders
+			case 'milf':
+				switch (curStep)
+				{
+					case 512:
+						chromOn = true;
+					case 1024:
+						chromOn = false;
+				}
+
+
+			// example of using radial blur shaders
+			case 'high':
+				switch (curStep)
+				{
+					case 512:
+						radialBlurOn = true;
+					case 1024:
+						radialBlurOn = false;
+				}
+
+			*/
+
+			default:
+				// nothing lmao
+
+		}
+
 		#if windows
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
