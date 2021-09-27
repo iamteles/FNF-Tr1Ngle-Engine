@@ -14,6 +14,9 @@
 
 ![Lines of code](https://img.shields.io/tokei/lines/github.com/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
 
+
+You can use Tr1Ngle Engine as long as you credit me.
+
 Features:
 		
 	Misses info;
