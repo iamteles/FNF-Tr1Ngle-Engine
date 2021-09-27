@@ -6,6 +6,14 @@
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Tr1NgleDev/Tr1Ngle-Engine?label=latest-version&style=flat-square)
 
+![GitHub repo size](https://img.shields.io/github/repo-size/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
+
+![GitHub closed issues](https://img.shields.io/github/issues-closed/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
+
+![GitHub issues](https://img.shields.io/github/issues/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
+
+![Lines of code](https://img.shields.io/tokei/lines/github.com/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
+
 Features:
 		
 	Misses info;
