@@ -88,7 +88,6 @@ class PlayState extends MusicBeatState
 	var timeTxt:FlxText;
 
 	private var chromOn:Bool = false;
-	private var radialBlurOn:Bool = false;
 
 
 	public var spinCamHud:Bool = false;
@@ -1792,38 +1791,21 @@ class PlayState extends MusicBeatState
 		if(FlxG.save.data.shadersOn)
 		{
 			if (chromOn)
-		{
+			{
 		
-			ch = FlxG.random.int(1,5) / 1000;
-			ch = FlxG.random.int(1,5) / 1000;
-			Shaders.setChrome(ch);
+				ch = FlxG.random.int(1,5) / 1000;
+				ch = FlxG.random.int(1,5) / 1000;
+				Shaders.setChrome(ch);
 			
-		}
-		else
-		{
+			}
+			else
+			{
 
 
-			Shaders.setChrome(0);
+				Shaders.setChrome(0);
 			
 			
-		}
-
-
-		if (radialBlurOn)
-		{
-			
-
-			Shaders.setRadialBlur(640+(FlxG.random.int(-10,10)),360+(FlxG.random.int(-10,10)),FlxG.random.float(0.001,0.005));
-			
-		}
-		else
-		{
-
-
-			Shaders.setRadialBlur(0, 0, 0);
-			
-			
-		}
+			}
 
 		}
 		
@@ -3020,18 +3002,6 @@ class PlayState extends MusicBeatState
 					case 1024:
 						chromOn = false;
 				}
-
-
-			// example of using radial blur shaders
-			case 'high':
-				switch (curStep)
-				{
-					case 512:
-						radialBlurOn = true;
-					case 1024:
-						radialBlurOn = false;
-				}
-
 			*/
 
 			default:
@@ -3086,10 +3056,8 @@ class PlayState extends MusicBeatState
 			shadersLoaded = true;
 
 			filters.push(Shaders.chromaticAberration);
-			filters.push(Shaders.radialBlur);
 			
 			camfilters.push(Shaders.chromaticAberration);
-			camfilters.push(Shaders.radialBlur);
 
 
 		}
