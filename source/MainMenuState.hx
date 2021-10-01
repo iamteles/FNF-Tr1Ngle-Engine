@@ -108,20 +108,20 @@ class MainMenuState extends MusicBeatState
 			
 		}
 
-		FlxG.camera.follow(camFollow, null, 0.06);
+		
 
 		var versionShit:FlxText = new FlxText(5, FlxG.height - 36, 0, "Game version:" + Application.current.meta.get('version') , 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
 
-		var engineVersionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "Tr1NgleEngine version: 1.5.0", 12);
+		var engineVersionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "Tr1NgleEngine version: 1.5.5", 12);
 		engineVersionShit.scrollFactor.set();
 		engineVersionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(engineVersionShit);
 
 		
-
+		FlxG.camera.follow(camFollow, null, 0.06);
 		
 
 		// NG.core.calls.event.logEvent('swag').send();
@@ -135,6 +135,9 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+
+		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
+
 		if (FlxG.sound.music.volume < 0.8)
 		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;

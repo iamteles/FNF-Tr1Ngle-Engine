@@ -42,9 +42,23 @@ class Alphabet extends FlxSpriteGroup
 
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false)
 	{
+		
+		this.isBold = false;
+		this.splitWords = [];
+		this.xPosResetted = lastWasSpace = false;
+		this.yMulti = 1;
+		this.text = _finalText = "";
+		this.isMenuItem = false;
+		this.targetY = 0;
 		super(x, y);
+		this.text = _finalText = text;
+		this.isBold = bold;
+		if(text != "")
+		{
+			typed ? startTypedText() : addText();
+		}
 
-		_finalText = text;
+		/*_finalText = text;
 		this.text = text;
 		isBold = bold;
 
@@ -58,16 +72,19 @@ class Alphabet extends FlxSpriteGroup
 			{
 				addText();
 			}
-		}
+		}*/
 	}
 
 	public function addText()
 	{
-		doSplitWords();
+		/*doSplitWords();
 
 		var xPos:Float = 0;
 		for (character in splitWords)
 		{
+
+			
+
 			// if (character.fastCodeAt() == " ")
 			// {
 			// }
@@ -107,7 +124,61 @@ class Alphabet extends FlxSpriteGroup
 			}
 
 			// loopNum += 1;
+
+		}*/
+
+		doSplitWords();
+		var a:Float = 0;
+		var b:Int = 0;
+		var c:Array<String> = splitWords;
+		for (i in 0 ... c.length) 
+		{
+			if(b < c.length)
+			{
+				var d:String = c[b];
+				b++;
+				if(d == " " || d == "-")
+				{
+					lastWasSpace = true;
+				}
+				if(AlphaCharacter.alphabet.indexOf(d.toLowerCase()) != -1)
+				{
+					if(lastSprite != null) a = lastSprite.x + lastSprite.width;
+					if(lastWasSpace)
+					{
+						a += 40;
+						lastWasSpace = false;
+					}
+					var e:AlphaCharacter = new AlphaCharacter(a,0);
+					if(isBold)
+					{
+						e.createBold(d);
+					}
+					else
+					{
+						e.createLetter(d);
+					}
+					add(e);
+					lastSprite = e;
+				}
+			}
 		}
+		
+        /*for (var a = 0, b = 0, c = this.splitWords; b < c.length; ) {
+            var d = c[b];
+            ++b;
+            if (" " == d || "-" == d)
+                this.lastWasSpace = !0;
+            if (-1 != Y.alphabet.indexOf(d.toLowerCase())) {
+                null != this.lastSprite && (a = this.lastSprite.x + this.lastSprite.get_width());
+                this.lastWasSpace && (a += 40,
+                this.lastWasSpace = !1);
+                var e = new Y(a,0);
+                this.isBold ? e.createBold(d) : e.createLetter(d);
+                this.add(e);
+                this.lastSprite = e
+            }
+        }*/
 	}
 
 	function doSplitWords():Void
@@ -120,6 +191,82 @@ class Alphabet extends FlxSpriteGroup
 	public function startTypedText():Void
 	{
 		_finalText = text;
+		doSplitWords();
+		var b:Int = 0;
+		var c:Float = 0;
+		var d:Int = 0;
+
+		new FlxTimer().start(0.05, function(e:FlxTimer)
+		{
+			if(_finalText.fastCodeAt(b) == 10)
+			{
+				yMulti += 1;
+				xPosResetted = true;
+				c = 0;
+				d += 1;
+			}
+			if(splitWords[b] == " ")
+			{
+				lastWasSpace = true;
+			}
+			
+			
+			var f:Bool = AlphaCharacter.numbers.indexOf(splitWords[b]) != -1;
+			var h:Bool = AlphaCharacter.symbols.indexOf(splitWords[b]) != -1;
+			
+			
+			if(AlphaCharacter.alphabet.indexOf(splitWords[b].toLowerCase()) != -1 || f || h)
+			{
+				if (lastSprite != null && !xPosResetted)
+				{
+					lastSprite.updateHitbox();
+					c += lastSprite.width + 3;
+				}
+				else
+				{
+					xPosResetted = false;
+				}
+				if(lastWasSpace)
+				{
+					c += 20;
+					lastWasSpace = false;
+				}
+
+				var m:AlphaCharacter = new AlphaCharacter(c, 55 * yMulti);
+				m.row = d;
+				if (isBold)
+				{
+					m.createBold(splitWords[b]);
+				}
+				else
+				{
+					if (f)
+					{
+						m.createNumber(splitWords[b]);
+					}
+					else if (h)
+					{
+						m.createSymbol(splitWords[b]);
+					}
+					else
+					{
+						m.createLetter(splitWords[b]);
+					}
+
+					m.x += 90;
+				}
+				
+				if(FlxG.random.float(0, 100) < 45)
+				{
+					FlxG.sound.play(Paths.sound("GF_" + FlxG.random.int(1, 4), null));
+				}
+				add(m);
+				lastSprite = m;
+			}
+			b += 1;
+			e.time = FlxG.random.float(0.04, 0.09);
+		}, this.splitWords.length);
+		/*_finalText = text;
 		doSplitWords();
 
 		// trace(arrayShit);
@@ -215,7 +362,7 @@ class Alphabet extends FlxSpriteGroup
 			loopNum += 1;
 
 			tmr.time = FlxG.random.float(0.04, 0.09);
-		}, splitWords.length);
+		}, splitWords.length);*/
 	}
 
 	override function update(elapsed:Float)
@@ -224,8 +371,8 @@ class Alphabet extends FlxSpriteGroup
 		{
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 
-			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.30);
-			x = FlxMath.lerp(x, (targetY * 20) + 90, 0.30);
+			y = CoolUtil.coolLerp(y, 120 * scaledY + 0.48 * FlxG.height, 0.16);
+			x = CoolUtil.coolLerp(x, 20 * targetY + 90, 0.16);
 		}
 
 		super.update(elapsed);
@@ -245,6 +392,7 @@ class AlphaCharacter extends FlxSprite
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
+		row = 0;
 		var tex = Paths.getSparrowAtlas('alphabet');
 		frames = tex;
 

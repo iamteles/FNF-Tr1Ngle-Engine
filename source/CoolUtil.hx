@@ -38,24 +38,30 @@ class CoolUtil
 		return dumbArray;
 	}
 
-	public static function smoothColorChange(from:FlxColor, to:FlxColor, speed:Float):FlxColor
-
+	public static function smoothColorChange(from:FlxColor, to:FlxColor, speed:Float = 0.045):FlxColor
 	{
-
-	   	speed = speed / 10;
 
 	    var result:FlxColor = FlxColor.fromRGBFloat
 	    (
-	        FlxMath.lerp(from.redFloat, to.redFloat, speed), //red
+	        CoolUtil.coolLerp(from.redFloat, to.redFloat, speed), //red
 
-	        FlxMath.lerp(from.greenFloat, to.greenFloat, speed), //green
+	        CoolUtil.coolLerp(from.greenFloat, to.greenFloat, speed), //green
 
-	        FlxMath.lerp(from.blueFloat, to.blueFloat, speed) //blue
+	        CoolUtil.coolLerp(from.blueFloat, to.blueFloat, speed) //blue
 	    );
 
 	    return result;
 
 	   
 
+	}
+	
+	public static function camLerpShit(a:Float):Float
+	{
+		return FlxG.elapsed / 0.016666666666666666 * a;
+	}
+	public static function coolLerp(a:Float, b:Float, c:Float):Float
+	{
+		return a + CoolUtil.camLerpShit(c) * (b - a);
 	}
 }

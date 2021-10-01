@@ -7,17 +7,26 @@ import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
-
+import openfl.display.BitmapData;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
 
+#if cpp
+import sys.FileSystem;
+import sys.io.File;
+#end
+
+import flixel.graphics.FlxGraphic;
+
 import haxe.io.Path;
+
+using StringTools;
 
 class LoadingState extends MusicBeatState
 {
-	inline static var MIN_TIME = 1.0;
+	inline static var MIN_TIME = 60.0;
 	
 	var target:FlxState;
 	var stopMusic = false;
@@ -26,6 +35,10 @@ class LoadingState extends MusicBeatState
 	var logo:FlxSprite;
 	var gfDance:FlxSprite;
 	var danceLeft = false;
+
+	var images = [];
+	var sharedImages = [];
+
 	
 	function new(target:FlxState, stopMusic:Bool)
 	{
@@ -47,6 +60,10 @@ class LoadingState extends MusicBeatState
 		// logoBl.screenCenter();
 		// logoBl.color = FlxColor.BLACK;
 
+		
+
+		
+
 		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
 		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
 		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
@@ -54,29 +71,81 @@ class LoadingState extends MusicBeatState
 		gfDance.antialiasing = true;
 		add(gfDance);
 		add(logo);
+
 		
-		initSongsManifest().onComplete
-		(
-			function (lib)
+
+		
+		
+		if(FlxG.save.data.preloadCharacters)
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
+
+			var dad:Character = new Character(100, 100, characters[0]);
+
+			var charNumber:Int = 0;
+			var startTimer:FlxTimer = new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
-				callbacks = new MultiCallback(onLoad);
-				var introComplete = callbacks.add("introComplete");
-				checkLoadSong(getSongPath());
-				if (PlayState.SONG.needsVoices)
-					checkLoadSong(getVocalPath());
-				checkLibrary("shared");
-				if (PlayState.storyWeek > 0)
-					checkLibrary("week" + PlayState.storyWeek);
-				else
-					checkLibrary("tutorial");
-				
-				var fadeTime = 0.5;
-				FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
-				new FlxTimer().start(fadeTime + MIN_TIME, function(_) introComplete());
-			}
-		);
+				remove(dad);
+				dad.destroy();
+				dad = new Character(100, 100, characters[charNumber]);
+				charNumber++;
+				add(dad);
+				if(charNumber == characters.length)
+				{
+					initSongsManifest().onComplete
+					(
+						function (lib)
+						{
+							callbacks = new MultiCallback(onLoad);
+							var introComplete = callbacks.add("introComplete");
+							checkLoadSong(getSongPath());
+							if (PlayState.SONG.needsVoices)
+								checkLoadSong(getVocalPath());
+							checkLibrary("shared");
+							checkLoadImages();
+							if (PlayState.storyWeek > 0)
+								checkLibrary("week" + PlayState.storyWeek);
+							else
+								checkLibrary("tutorial");
+							
+							var fadeTime = 0.5;
+							FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
+							new FlxTimer().start(fadeTime + MIN_TIME, function(_) introComplete());
+						}
+					);
+				}
+
+			}, characters.length);
+		}else
+		{
+			initSongsManifest().onComplete
+			(
+				function (lib)
+				{
+					callbacks = new MultiCallback(onLoad);
+					var introComplete = callbacks.add("introComplete");
+					checkLoadSong(getSongPath());
+					if (PlayState.SONG.needsVoices)
+						checkLoadSong(getVocalPath());
+					checkLibrary("shared");
+					checkLoadImages();
+					if (PlayState.storyWeek > 0)
+						checkLibrary("week" + PlayState.storyWeek);
+					else
+						checkLibrary("tutorial");
+					
+					var fadeTime = 0.5;
+					FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
+					new FlxTimer().start(fadeTime + MIN_TIME, function(_) introComplete());
+				}
+			);
+		}
+		
 	}
 	
+	
+	
+
 	function checkLoadSong(path:String)
 	{
 		if (!Assets.cache.hasSound(path))
@@ -90,6 +159,19 @@ class LoadingState extends MusicBeatState
 			var callback = callbacks.add("song:" + path);
 			Assets.loadSound(path).onComplete(function (_) { callback(); });
 		}
+	}
+
+	function checkLoadImages()
+	{
+		for (i in 0 ... images.length) 
+		{
+			if (!Assets.cache.hasBitmapData(images[i]))
+			{
+				var callback = callbacks.add("image:" + images[i]);
+				Assets.loadBitmapData(images[i]).onComplete(function (_) { callback(); });
+			}
+		}
+		
 	}
 	
 	function checkLibrary(library:String)
@@ -140,6 +222,8 @@ class LoadingState extends MusicBeatState
 	{
 		return Paths.inst(PlayState.SONG.song);
 	}
+
+	
 	
 	static function getVocalPath()
 	{
@@ -167,6 +251,7 @@ class LoadingState extends MusicBeatState
 		var loaded = isSoundLoaded(getSongPath())
 			&& (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath()))
 			&& isLibraryLoaded("shared");
+			&& isImagesLoaded();
 		
 		if (!loaded)
 			return new LoadingState(target, stopMusic);
@@ -186,6 +271,15 @@ class LoadingState extends MusicBeatState
 	static function isLibraryLoaded(library:String):Bool
 	{
 		return Assets.getLibrary(library) != null;
+	}
+
+	static function isImagesLoaded():Bool
+	{
+		for (i in 0 ... images.length) 
+		{
+			return Assets.cache.hasImage(images[i]) != null;
+		}
+		
 	}
 	#end
 	
@@ -315,6 +409,8 @@ class MultiCallback
 		if (logId != null)
 			trace('$logId: $msg');
 	}
+	
+	
 	
 	public function getFired() return fired.copy();
 	public function getUnfired() return [for (id in unfired.keys()) id];

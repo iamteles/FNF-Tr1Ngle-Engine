@@ -32,7 +32,7 @@ class BindMenu extends MusicBeatState
     var warningColorTween:FlxTween;
     var keyText:Array<String> = ["LEFT", "DOWN", "UP", "RIGHT"];
     var defaultKeys:Array<String> = ["A", "S", "W", "D"];
-    var curSelected:Int = 0;
+    var curSelected:Int = 1;
 
     var keys:Array<String> = [FlxG.save.data.leftBind,
                               FlxG.save.data.downBind,
@@ -45,6 +45,8 @@ class BindMenu extends MusicBeatState
     var state:String = "select";
 
     var menuBG:FlxSprite;
+
+    private var grpControls:FlxTypedGroup<Alphabet>;
 
 	override function create()
 	{	
@@ -71,13 +73,26 @@ class BindMenu extends MusicBeatState
 
 		
 
-        keyTextDisplay = new FlxText(-10, 0, 1280, "", 72);
+        /*keyTextDisplay = new FlxText(-10, 0, 1280, "", 72);
 		keyTextDisplay.scrollFactor.set(0, 0);
 		keyTextDisplay.setFormat(Paths.font("vcr.ttf"), 54, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		keyTextDisplay.borderSize = 2;
 		keyTextDisplay.borderQuality = 1;
 		
-        add(keyTextDisplay);
+        add(keyTextDisplay);*/
+
+        grpControls = new FlxTypedGroup<Alphabet>();
+        add(grpControls);
+        for (i in 0...5)
+        {
+            var controlLabel:Alphabet = new Alphabet(0, (30 * i) + 30, "NOTES", true, false);
+            controlLabel.isMenuItem = true;
+            controlLabel.ID = i;
+            controlLabel.screenCenter(X);
+            controlLabel.targetY = i;
+            grpControls.add(controlLabel);
+            // DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
+        }
 
         keyWarning = new FlxText(0, 580, 1280, "WARNING:TRY ANOTHER KEY", 42);
 		keyWarning.scrollFactor.set(0, 0);
@@ -87,6 +102,7 @@ class BindMenu extends MusicBeatState
         keyWarning.screenCenter(X);
         keyWarning.alpha = 0;
         add(keyWarning);
+        
 
 		
 
@@ -94,12 +110,18 @@ class BindMenu extends MusicBeatState
         warningColorTween = FlxTween.tween(menuBG, {color: 0xFFea71fd}, 0);
 
         textUpdate();
+        changeItem(0);
 
 		super.create();
 	}
 
 	override function update(elapsed:Float)
 	{
+
+        for(i in 0...5)
+        {
+            grpControls.members[i].screenCenter(X);
+        }
 
         switch(state){
 
@@ -130,19 +152,18 @@ class BindMenu extends MusicBeatState
                 }
 
             case "input":
-                tempKey = keys[curSelected];
-                keys[curSelected] = "?";
-                textUpdate();
+                tempKey = keys[curSelected - 1];
+                keys[curSelected - 1] = "?";
                 state = "waiting";
 
             case "waiting":
                 if(FlxG.keys.justPressed.ESCAPE){
-                    keys[curSelected] = tempKey;
+                    keys[curSelected - 1] = tempKey;
                     state = "select";
                     FlxG.sound.play(Paths.sound("scrollMenu"), 1, false);
                 }
                 else if(FlxG.keys.justPressed.ENTER){
-                    addKey(defaultKeys[curSelected]);
+                    addKey(defaultKeys[curSelected - 1]);
                     save();
                     state = "select";
                 }
@@ -161,8 +182,10 @@ class BindMenu extends MusicBeatState
 
         }
 
-        if(FlxG.keys.justPressed.ANY)
+        if(FlxG.keys.justPressed.ANY && !FlxG.keys.justPressed.UP && !FlxG.keys.justPressed.DOWN && !FlxG.keys.justPressed.LEFT && !FlxG.keys.justPressed.RIGHT){
 			textUpdate();
+             
+        }
 
 		super.update(elapsed);
 		
@@ -170,29 +193,26 @@ class BindMenu extends MusicBeatState
 
     public function textUpdate(){
 
-        keyTextDisplay.text = "\n\n";
+        
 
-        for(i in 0...4){
+        for(i in 1...5)
+        {
 
-            var textStart = (i == curSelected) ? "> " : "  ";
-
-            if(i == curSelected)
-            {
-                keyTextDisplay.borderSize = 3.5;
-                keyTextDisplay.color = FlxColor.WHITE;
-            }
-            else
-            {
-                keyTextDisplay.borderSize = 2;
-                keyTextDisplay.color = FlxColor.WHITE + FlxColor.BLACK;
-            }
-
-            keyTextDisplay.text += textStart + keyText[i] + ": " + ((keys[i] != keyText[i]) ? (keys[i] + " / ") : "" ) + keyText[i] + " ARROW\n";
-
+            //keyTextDisplay.text += textStart + keyText[i];
+            grpControls.remove(grpControls.members[i]);
+            var ctrl:Alphabet = new Alphabet(0, (30 * i) + 30, keyText[i - 1] + ": " + (keys[i - 1] != null ? keys[i - 1] : "NOTHING"), false, false);
+            ctrl.ID = i;
+            ctrl.isMenuItem = true;
+            ctrl.screenCenter(X);
+            ctrl.targetY = curSelected;
+            grpControls.add(ctrl);
+            changeItem(0);
             
         }
 
-        keyTextDisplay.screenCenter();
+        //keyTextDisplay.screenCenter();
+
+        
 
     }
 
@@ -240,10 +260,10 @@ class BindMenu extends MusicBeatState
 
         for(x in blacklist){notAllowed.push(x);}
 
-        if(curSelected != 4){
+        if(curSelected != 5){
 
             for(x in keyText){
-                if(x != keyText[curSelected]){notAllowed.push(x);}
+                if(x != keyText[curSelected - 1]){notAllowed.push(x);}
             }
             
         }
@@ -259,11 +279,11 @@ class BindMenu extends MusicBeatState
             }
 
         if(shouldReturn){
-            keys[curSelected] = r;
+            keys[curSelected - 1] = r;
             FlxG.sound.play(Paths.sound("scrollMenu"), 1, false);
         }
         else{
-            keys[curSelected] = tempKey;
+            keys[curSelected - 1] = tempKey;
             FlxG.sound.play(Paths.sound("scrollMenu"), 1, false);
             keyWarning.alpha = 1;
             menuBG.color = FlxColor.RED + FlxColor.YELLOW;
@@ -272,16 +292,37 @@ class BindMenu extends MusicBeatState
             warningColorTween.cancel();
             warningColorTween = FlxTween.tween(menuBG, {color: 0xFFea71fd}, 0.5, {ease: FlxEase.circOut, startDelay: 2});
         }
-
-	}
+        
+        changeItem(0);
+	} 
 
     public function changeItem(_amount:Int = 0)
     {
+        FlxG.sound.play(Paths.sound("scrollMenu"), 0.4, false);
+
         curSelected += _amount;
-        FlxG.sound.play(Paths.sound("scrollMenu"), 1, false);
-        if (curSelected > 3)
-            curSelected = 0;
-        if (curSelected < 0)
-            curSelected = 3;
+
+        if (curSelected < 1)
+            curSelected = grpControls.length - 1;
+        if (curSelected >= grpControls.length)
+            curSelected = 1;
+
+        var bullShit:Int = 0;
+
+        for (item in grpControls.members)
+        {
+            item.targetY = bullShit - curSelected;
+            bullShit++;
+
+            if(item.ID != 0)
+                item.alpha = 0.6;
+            // item.setGraphicSize(Std.int(item.width * 0.8));
+
+            if (item.targetY == 0)
+            {
+                item.alpha = 1;
+                // item.setGraphicSize(Std.int(item.width));
+            }
+        }
     }
 }

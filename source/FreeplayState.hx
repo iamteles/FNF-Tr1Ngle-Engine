@@ -198,7 +198,7 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
 
-		bg.color = CoolUtil.smoothColorChange(bg.color, bgColorhaha, 0.20);
+		bg.color = CoolUtil.smoothColorChange(bg.color, bgColorhaha, 0.045);
 
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.4));
 

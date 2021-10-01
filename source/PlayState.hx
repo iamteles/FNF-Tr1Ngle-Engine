@@ -3,6 +3,13 @@ package;
 #if desktop
 import Discord.DiscordClient;
 #end
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
+import openfl.utils.Assets as OpenFlAssets;
+#if cpp
+import sys.FileSystem;
+import sys.io.File;
+#end
 import Section.SwagSection;
 import Song.SwagSong;
 import WiggleEffect.WiggleEffectType;
@@ -73,6 +80,8 @@ class PlayState extends MusicBeatState
 
 	private var strumLine:FlxSprite;
 	private var curSection:Int = 0;
+
+	var images = [];
 
 	private var camFollow:FlxObject;
 
@@ -191,7 +200,6 @@ class PlayState extends MusicBeatState
 
 	var spinMicBeat:Int = 0;
 	var spinMicOffset:Int = 4;
-	
 
 
 	override public function create()
@@ -226,6 +234,62 @@ class PlayState extends MusicBeatState
 
 		persistentUpdate = true;
 		persistentDraw = true;
+
+		#if cpp
+		if (FlxG.save.data.preloadCharacters)
+		{
+			trace("caching images...");
+
+			for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/images")))
+			{
+				//trace(i);
+				if (!i.endsWith(".png"))
+					continue;
+				if(i.split(".")[1] == "png")
+					images.push(i.split(".")[0]);
+			}
+			for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/images")))
+			{
+				//trace(i);
+				if (!i.endsWith(".png"))
+					continue;
+				if(i.split(".")[1] == "png")
+					images.push(i.split(".")[0]);
+			}
+			if(FileSystem.exists("assets/week" + storyWeek + "/images"))
+			{
+				for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/week" + storyWeek + "/images")))
+				{
+					//trace(i);
+					if (!i.endsWith(".png"))
+						continue;
+					if(i.split(".")[1] == "png")
+						images.push(i.split(".")[0]);
+				}
+			}
+			
+		}
+		#end
+
+		//trace(images);
+		if (FlxG.save.data.preloadCharacters)
+		{
+
+			for (i in 0 ... images.length) 
+			{
+				var sprite:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image(images[i]));
+				sprite.visible = false;
+		 	        add(sprite);
+		 	        sprite.visible = false;
+				if (!OpenFlAssets.cache.hasBitmapData(images[i]))
+				{
+					OpenFlAssets.loadBitmapData(images[i]);
+				}
+				//remove(sprite);
+				sprite.visible = false;
+			}
+
+		}
 
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
@@ -665,6 +729,8 @@ class PlayState extends MusicBeatState
 		gf.scrollFactor.set(0.95, 0.95);
 
 		dad = new Character(100, 100, SONG.player2);
+
+
 
 		var camPos:FlxPoint = new FlxPoint(dad.getGraphicMidpoint().x, dad.getGraphicMidpoint().y);
 
@@ -1252,6 +1318,95 @@ class PlayState extends MusicBeatState
 			// generateSong('fresh');
 		}, 5);
 	}
+	function startFakeCountdown(withSound:Bool):Void
+	{
+
+		var swagCounter:Int = 0;
+
+		startTimer = new FlxTimer().start(Conductor.crochet / 1000, function(tmr:FlxTimer)
+		{
+			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
+			introAssets.set('default', ['ready', "set", "go"]);
+			introAssets.set('school', ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel']);
+			introAssets.set('schoolEvil', ['weeb/pixelUI/ready-pixel', 'weeb/pixelUI/set-pixel', 'weeb/pixelUI/date-pixel']);
+
+			var introAlts:Array<String> = introAssets.get('default');
+			var altSuffix:String = "";
+
+			for (value in introAssets.keys())
+			{
+				if (value == curStage)
+				{
+					introAlts = introAssets.get(value);
+					altSuffix = '-pixel';
+				}
+			}
+
+			switch (swagCounter)
+
+			{
+				case 0:
+					if(withSound)FlxG.sound.play(Paths.sound('intro3'), 0.6);
+				case 1:
+					var ready:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
+					ready.scrollFactor.set();
+					ready.updateHitbox();
+
+					if (curStage.startsWith('school'))
+						ready.setGraphicSize(Std.int(ready.width * daPixelZoom));
+
+					ready.screenCenter();
+					add(ready);
+					FlxTween.tween(ready, {y: ready.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn:FlxTween)
+						{
+							ready.destroy();
+						}
+					});
+					if(withSound)FlxG.sound.play(Paths.sound('intro2'), 0.6);
+				case 2:
+					var set:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
+					set.scrollFactor.set();
+
+					if (curStage.startsWith('school'))
+						set.setGraphicSize(Std.int(set.width * daPixelZoom));
+
+					set.screenCenter();
+					add(set);
+					FlxTween.tween(set, {y: set.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn:FlxTween)
+						{
+							set.destroy();
+						}
+					});
+					if(withSound)FlxG.sound.play(Paths.sound('intro1'), 0.6);
+				case 3:
+					var go:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
+					go.scrollFactor.set();
+
+					if (curStage.startsWith('school'))
+						go.setGraphicSize(Std.int(go.width * daPixelZoom));
+
+					go.updateHitbox();
+
+					go.screenCenter();
+					add(go);
+					FlxTween.tween(go, {y: go.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn:FlxTween)
+						{
+							go.destroy();
+						}
+					});
+					if(withSound)FlxG.sound.play(Paths.sound('introGo'), 0.6);
+				case 4:
+			}
+
+			swagCounter += 1;
+		}, 5);
+	}
 
 	var previousFrameTime:Int = 0;
 	var lastReportedPlayheadPosition:Int = 0;
@@ -1763,6 +1918,8 @@ class PlayState extends MusicBeatState
 		
 		super.update(elapsed);
 
+		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.04);
+
 		if(totalAccuracy >= maxTotalAccuracy)
 			maxTotalAccuracy = totalAccuracy;
 		if(combo >= maxCombo)
@@ -1904,6 +2061,16 @@ class PlayState extends MusicBeatState
 
 		iconP1.setGraphicSize(Std.int(150 + 0.85 * (iconP1.width - 150)));
                 iconP2.setGraphicSize(Std.int(150 + 0.85 * (iconP2.width - 150)));
+
+                if(iconP1.angle < 0)
+                	iconP1.angle = CoolUtil.coolLerp(iconP1.angle, 0, Conductor.crochet / 1000 / cameraBeatSpeed);
+                if(iconP2.angle > 0)
+                	iconP2.angle = CoolUtil.coolLerp(iconP2.angle, 0, Conductor.crochet / 1000 / cameraBeatSpeed);
+
+                if(iconP1.angle > 0)
+                	iconP1.angle = 0;
+                if(iconP2.angle < 0)
+                	iconP2.angle = 0;
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -3045,6 +3212,21 @@ class PlayState extends MusicBeatState
 			});
 	}
 
+	public function changeCharacter(char:String = "dad")
+	{
+		var oldDadX:Float = dad.x;
+		var oldDadY:Float = dad.y;
+		oldDadY = dad.y;
+		oldDadX = dad.x;
+		remove(dad);
+        	dad.destroy();
+        	dad = new Character(oldDadX,oldDadY,char);
+        	add(dad);
+	}
+
+	var cameraBeatSpeed:Int = 4;
+	var cameraBeatZoom:Float = 0.015;
+
 	override function beatHit()
 	{
 		super.beatHit();
@@ -3088,14 +3270,20 @@ class PlayState extends MusicBeatState
 		// HARDCODING FOR MILF ZOOMS!
 		if (curSong.toLowerCase() == 'milf' && curBeat >= 168 && curBeat < 200 && camZooming && FlxG.camera.zoom < 1.35)
 		{
-			FlxG.camera.zoom += 0.015;
-			camHUD.zoom += 0.03;
+			FlxG.camera.zoom += cameraBeatZoom;
+			camHUD.zoom += cameraBeatZoom * 2;
 		}
 
-		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0)
+		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % cameraBeatSpeed == 0)
 		{
-			FlxG.camera.zoom += 0.015;
-			camHUD.zoom += 0.03;
+			FlxG.camera.zoom += cameraBeatZoom;
+			camHUD.zoom += cameraBeatZoom * 2;
+		}
+
+		if(curBeat % cameraBeatSpeed == 0)
+		{
+			iconP1.angle -= 40;
+			iconP2.angle += 40;
 		}
 
 		iconP1.setGraphicSize(Std.int(iconP1.width + 30));
