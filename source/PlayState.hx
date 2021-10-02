@@ -235,61 +235,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = true;
 		persistentDraw = true;
 
-		#if cpp
-		if (FlxG.save.data.preloadCharacters)
-		{
-			trace("caching images...");
-
-			for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/images")))
-			{
-				//trace(i);
-				if (!i.endsWith(".png"))
-					continue;
-				if(i.split(".")[1] == "png")
-					images.push(i.split(".")[0]);
-			}
-			for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/images")))
-			{
-				//trace(i);
-				if (!i.endsWith(".png"))
-					continue;
-				if(i.split(".")[1] == "png")
-					images.push(i.split(".")[0]);
-			}
-			if(FileSystem.exists("assets/week" + storyWeek + "/images"))
-			{
-				for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/week" + storyWeek + "/images")))
-				{
-					//trace(i);
-					if (!i.endsWith(".png"))
-						continue;
-					if(i.split(".")[1] == "png")
-						images.push(i.split(".")[0]);
-				}
-			}
-			
-		}
-		#end
-
-		//trace(images);
-		if (FlxG.save.data.preloadCharacters)
-		{
-
-			for (i in 0 ... images.length) 
-			{
-				var sprite:FlxSprite = new FlxSprite(0).loadGraphic(Paths.image(images[i]));
-				sprite.visible = false;
-		 	        add(sprite);
-		 	        sprite.visible = false;
-				if (!OpenFlAssets.cache.hasBitmapData(images[i]))
-				{
-					OpenFlAssets.loadBitmapData(images[i]);
-				}
-				//remove(sprite);
-				sprite.visible = false;
-			}
-
-		}
+		CoolUtil.preloadImages(this);
 
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
@@ -2166,10 +2112,9 @@ class PlayState extends MusicBeatState
 				// trace(PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection);
 			}
 
-			if (camFollow.x != dad.getMidpoint().x + 150 && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
+			if (/*camFollow.x != dad.getMidpoint().x + 150 &&*/ !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
 			{
 				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-				// camFollow.setPosition(lucky.getMidpoint().x - 120, lucky.getMidpoint().y + 210);
 
 				switch (dad.curCharacter)
 				{
@@ -2183,6 +2128,9 @@ class PlayState extends MusicBeatState
 						camFollow.x = dad.getMidpoint().x - 100;
 				}
 
+				
+
+
 				if (dad.curCharacter == 'mom')
 					vocals.volume = 1;
 
@@ -2192,22 +2140,49 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100)
+			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection/* && camFollow.x != boyfriend.getMidpoint().x - 100*/)
 			{
-				camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
+				var camFollowX:Float = boyfriend.getMidpoint().x;
+				var camFollowY:Float = boyfriend.getMidpoint().y;
+				
 
 				switch (curStage)
 				{
 					case 'limo':
-						camFollow.x = boyfriend.getMidpoint().x - 300;
+						camFollowX = boyfriend.getMidpoint().x - 200;
 					case 'mall':
-						camFollow.y = boyfriend.getMidpoint().y - 200;
+						camFollowY = boyfriend.getMidpoint().y - 100;
 					case 'school':
-						camFollow.x = boyfriend.getMidpoint().x - 200;
-						camFollow.y = boyfriend.getMidpoint().y - 200;
+						camFollowX = boyfriend.getMidpoint().x - 100;
+						camFollowY = boyfriend.getMidpoint().y - 100;
 					case 'schoolEvil':
-						camFollow.x = boyfriend.getMidpoint().x - 200;
-						camFollow.y = boyfriend.getMidpoint().y - 200;
+						camFollowX = boyfriend.getMidpoint().x - 100;
+						camFollowY = boyfriend.getMidpoint().y - 100;
+					default:
+						camFollowX = boyfriend.getMidpoint().x;
+						camFollowY = boyfriend.getMidpoint().y;
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singLEFT") && curStage != "school" && curStage != "schoolEvil" && curStage != "limo" && curStage != "mall")
+				{
+					camFollow.setPosition(camFollowX - 125, camFollowY - 100);
+
+
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singDOWN") && curStage != "school" && curStage != "schoolEvil" && curStage != "limo" && curStage != "mall")
+				{
+					camFollow.setPosition(camFollowX - 100, camFollowY - 25);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singUP") && curStage != "school" && curStage != "schoolEvil" && curStage != "limo" && curStage != "mall")
+				{
+					camFollow.setPosition(camFollowX - 100, camFollowY - 125);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("singRIGHT") && curStage != "school" && curStage != "schoolEvil" && curStage != "limo" && curStage != "mall")
+				{
+					camFollow.setPosition(camFollowX - 25, camFollowY - 100);
+				}
+				if(boyfriend.animation.curAnim.name.startsWith("idle"))
+				{
+					camFollow.setPosition(camFollowX - 100, camFollowY - 100);
 				}
 
 				if (SONG.song.toLowerCase() == 'tutorial')
@@ -3212,7 +3187,7 @@ class PlayState extends MusicBeatState
 			});
 	}
 
-	public function changeCharacter(char:String = "dad")
+	public function changeDadCharacter(char:String = "dad")
 	{
 		var oldDadX:Float = dad.x;
 		var oldDadY:Float = dad.y;
@@ -3222,6 +3197,37 @@ class PlayState extends MusicBeatState
         	dad.destroy();
         	dad = new Character(oldDadX,oldDadY,char);
         	add(dad);
+	}
+
+	public function changeAllCharacters(charDad:String = "dad", charGf:String = "gf", charBf:String = "bf")
+	{
+		changeGFCharacter(charGf);
+		changeDadCharacter(charDad);
+		changeBFCharacter(charBf);
+	}
+
+	public function changeGFCharacter(char:String = "gf")
+	{
+		var oldGFX:Float = gf.x;
+		var oldGFY:Float = gf.y;
+		oldGFY = gf.y;
+		oldGFX = gf.x;
+		remove(gf);
+        	gf.destroy();
+        	gf = new Character(oldGFX,oldGFY,char);
+        	add(gf);
+	}
+
+	public function changeBFCharacter(char:String = "bf")
+	{
+		var oldBfX:Float = boyfriend.x;
+		var oldBfY:Float = boyfriend.y;
+		oldBfY = boyfriend.y;
+		oldBfX = boyfriend.x;
+		remove(boyfriend);
+        	boyfriend.destroy();
+        	boyfriend = new Boyfriend(oldBfX,oldBfY,char);
+        	add(boyfriend);
 	}
 
 	var cameraBeatSpeed:Int = 4;

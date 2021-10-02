@@ -50,6 +50,9 @@ class MainMenuState extends MusicBeatState
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		}
 
+		CoolUtil.preloadImages(this);
+		CoolUtil.preloadImages(this);
+
 		persistentUpdate = persistentDraw = true;
 
 		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
@@ -164,6 +167,7 @@ class MainMenuState extends MusicBeatState
 
 			if (controls.ACCEPT)
 			{
+				CoolUtil.preloadImages(this);
 				if (optionShit[curSelected] == 'donate')
 				{
 					#if linux

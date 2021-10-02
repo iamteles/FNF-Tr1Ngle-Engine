@@ -351,10 +351,10 @@ class Character extends FlxSprite
 				animation.addByPrefix('singLEFTmiss', 'BF NOTE LEFT MISS', 24, false);
 				animation.addByPrefix('singRIGHTmiss', 'BF NOTE RIGHT MISS', 24, false);
 				animation.addByPrefix('singDOWNmiss', 'BF NOTE DOWN MISS', 24, false);
-				animation.addByPrefix('spinMic', 'BF idle dance', 24, false);
+				animation.addByPrefix('spinMic', 'BF MIC SPIN', 24, false);
 
 				addOffset('idle', -5);
-				addOffset('spinMic', -5);
+				addOffset('spinMic', 300, 15);
 				addOffset("singUP", -29, 27);
 				addOffset("singRIGHT", -38, -7);
 				addOffset("singLEFT", 12, -6);
