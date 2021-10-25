@@ -78,7 +78,7 @@ class FreeplayState extends MusicBeatState
 		// LOAD CHARACTERS
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.color = songs[curSelected].color;
+		bg.color = FlxColor.WHITE;
 		add(bg);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
@@ -198,7 +198,8 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
 
-		bg.color = CoolUtil.smoothColorChange(bg.color, bgColorhaha, 0.045);
+		bg.color = CoolUtil.smoothColorChange(bg.color, songs[curSelected].color, 0.045);
+
 
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.4));
 
@@ -300,7 +301,6 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	var bgColorhaha:FlxColor; 
 
 	function changeSelection(change:Int = 0)
 	{
@@ -326,8 +326,6 @@ class FreeplayState extends MusicBeatState
 		intendedCombo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
 		// lerpScore = 0;
 		#end
-
-		bgColorhaha = songs[curSelected].color;
 
 		#if PRELOAD_ALL
 		FlxG.sound.playMusic(Paths.inst(songs[curSelected].songName), 0);
@@ -371,6 +369,6 @@ class SongMetadata
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;
-		this.color = FlxColor.fromString("#" + color);
+		this.color = FlxColor.fromString(color);
 	}
 }

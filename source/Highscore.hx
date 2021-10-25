@@ -156,5 +156,9 @@ class Highscore
 		{
 			songAcc = FlxG.save.data.songAcc;
 		}
+		if (FlxG.save.data.songCombo != null)
+		{
+			songCombo = FlxG.save.data.songCombo;
+		}
 	}
 }

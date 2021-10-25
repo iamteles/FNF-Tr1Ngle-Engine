@@ -118,7 +118,7 @@ class MainMenuState extends MusicBeatState
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
 
-		var engineVersionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "Tr1NgleEngine version: 1.5.5", 12);
+		var engineVersionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "Tr1NgleEngine version: 1.6.0", 12);
 		engineVersionShit.scrollFactor.set();
 		engineVersionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(engineVersionShit);

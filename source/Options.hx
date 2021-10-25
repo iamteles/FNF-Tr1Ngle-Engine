@@ -88,6 +88,50 @@ class DownscrollOption extends Option
 	}
 }
 
+class BGForNotesOption extends Option
+{
+	public function new()
+	{
+		super();
+	}
+
+	public override function press(changeData:Bool):Bool
+	{
+		if(changeData)
+			FlxG.save.data.bgNotes = !FlxG.save.data.bgNotes;
+		acceptValues = FlxG.save.data.bgNotes;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "BG For Notes "/* + (!FlxG.save.data.downscroll ? "off" : "on")*/;
+	}
+}
+
+class HitsoundsOption extends Option
+{
+	public function new()
+	{
+		super();
+	}
+
+	public override function press(changeData:Bool):Bool
+	{
+		if(changeData)
+			FlxG.save.data.hitSounds = !FlxG.save.data.hitSounds;
+		acceptValues = FlxG.save.data.hitSounds;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Hitsounds ";
+	}
+}
+
 
 
 class MiddlescrollOption extends Option

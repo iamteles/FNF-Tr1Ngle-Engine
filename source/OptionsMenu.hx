@@ -13,6 +13,9 @@ import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
+import flixel.FlxG;
+import flixel.FlxObject;
+import flixel.util.FlxTimer;
 
 class OptionsMenu extends MusicBeatState
 {
@@ -23,6 +26,8 @@ class OptionsMenu extends MusicBeatState
 		new OptionCatagory("Preferences", [
 			new DownscrollOption(),
 			new MiddlescrollOption(),
+			new HitsoundsOption(),
+			new BGForNotesOption(),
 			new PauseCountdownOption(),
 			new InstantRespawnOption(),
 			new BotOption(),
@@ -43,6 +48,8 @@ class OptionsMenu extends MusicBeatState
 
 	var currentSelectedCat:OptionCatagory;
 
+	var camFollow:FlxObject;
+
 	override function create()
 	{
 		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image("menuDesat"));
@@ -50,6 +57,8 @@ class OptionsMenu extends MusicBeatState
 		menuBG.color = 0xFFea71fd;
 		menuBG.setGraphicSize(Std.int(menuBG.width * 1.1));
 		menuBG.updateHitbox();
+		menuBG.scrollFactor.x = 0;
+        menuBG.scrollFactor.y = 0.18;
 		menuBG.screenCenter();
 		menuBG.antialiasing = true;
 		add(menuBG);
@@ -57,19 +66,23 @@ class OptionsMenu extends MusicBeatState
 		grpControls = new FlxTypedGroup<Alphabet>();
 		add(grpControls);
 
+		camFollow = new FlxObject(0, 0, 1, 1);
+		camFollow.screenCenter(X);
+		add(camFollow);
+
 		
 
 		for (i in 0...options.length)
 		{
-			var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true, false);
-			controlLabel.isMenuItem = true;
-			controlLabel.targetY = i;
+			var controlLabel:Alphabet = new Alphabet(0, (100 * i) + 105, options[i].getName(), true, false);
 			grpControls.add(controlLabel);
-
-			
 
 			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
 		}
+
+		FlxG.camera.follow(camFollow, null, 0.06);
+
+		changeSelection(0);
 		
 
 		super.create();
@@ -89,6 +102,8 @@ class OptionsMenu extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
 
 		if(!isCat)
 		{
@@ -125,13 +140,12 @@ class OptionsMenu extends MusicBeatState
 
 				for (i in 0...options.length)
 					{
-						var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true, false);
-						controlLabel.isMenuItem = true;
-						controlLabel.targetY = i;
+						var controlLabel:Alphabet = new Alphabet(0, (100 * i) + 105, options[i].getName(), true, false);
 						grpControls.add(controlLabel);
 						// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
 					}
 				curSelected = 0;
+				changeSelection(0);
 			}
 			if (FlxG.keys.justPressed.UP)
 				changeSelection(-1);
@@ -174,43 +188,48 @@ class OptionsMenu extends MusicBeatState
 
 
 						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true, false);
-						ctrl.isMenuItem = true;
 						grpControls.add(ctrl);
-						updateCheckboxes();
+						ctrl.isMenuItem = true;
+						checkBoxesArray[curSelected].sprTracker = grpControls.members[curSelected];
+						checkBoxesArray[curSelected].set_daValue(currentSelectedCat.getOptions()[curSelected].getAccept());
+						//updateCheckboxes();
 					}
 				}
 				else
 				{
-					if(options[curSelected].getName() == "Controls")
-					{
-						FlxG.switchState(new BindMenu());
-					}
-					else if(options[curSelected].getName() == "Exit")
-					{
-						FlxG.switchState(new MainMenuState());
-					}
-					else
-					{
-						currentSelectedCat = options[curSelected];
-						isCat = true;
-						grpControls.clear();
-						for (i in 0...currentSelectedCat.getOptions().length)
-							{
-								var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), true, false);
-								controlLabel.isMenuItem = true;
-								controlLabel.targetY = i;
-								grpControls.add(controlLabel);
-								// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-								/*var checkbox:CheckboxThingie = new CheckboxThingie(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getAccept());
-								checkbox.sprTracker = controlLabel;
+					
+                        if(options[curSelected].getName() == "Controls")
+						{
+							FlxG.switchState(new BindMenu());
+						}
+						else if(options[curSelected].getName() == "Exit")
+						{
+							FlxG.switchState(new MainMenuState());
+						}
+						else
+						{
+							currentSelectedCat = options[curSelected];
+							isCat = true;
+							grpControls.clear();
+							for (i in 0...currentSelectedCat.getOptions().length)
+								{
+									var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), true, false);
+									controlLabel.isMenuItem = true;
+									controlLabel.targetY = i;
+									grpControls.add(controlLabel);
+									// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
+									/*var checkbox:CheckboxThingie = new CheckboxThingie(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getAccept());
+									checkbox.sprTracker = controlLabel;
 
-								// using a FlxGroup is too much fuss!
-								checkBoxesArray.push(checkbox);
-								add(checkbox);*/
-							}
-						curSelected = 0;
-						updateCheckboxes();
-					}
+									// using a FlxGroup is too much fuss!
+									checkBoxesArray.push(checkbox);
+									add(checkbox);*/
+								}
+							curSelected = 0;
+							updateCheckboxes();
+						}
+                    
+					
 					
 				}
 			}
@@ -252,6 +271,8 @@ class OptionsMenu extends MusicBeatState
 			curSelected = grpControls.length - 1;
 		if (curSelected >= grpControls.length)
 			curSelected = 0;
+
+		camFollow.screenCenter();
 
 		
 
