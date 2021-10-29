@@ -83,6 +83,10 @@ class PlayState extends MusicBeatState
 
 	private var camFollow:FlxObject;
 
+	public var kps:Int = 0;
+	public var kpsMax:Int = 0;
+	private var time:Float = 0;
+
 	private static var prevCamFollow:FlxObject;
 
 	private var strumLineNotes:FlxTypedGroup<FlxSprite>;
@@ -199,6 +203,20 @@ class PlayState extends MusicBeatState
 	var spinMicBeat:Int = 0;
 	var spinMicOffset:Int = 4;
 
+	public var clicks:Array<Float> = [];
+
+	private function CalculateKeysPerSecond()
+	{
+
+		for (i in 0 ... clicks.length)
+		{
+			if (clicks[i] <= time - 1)
+			{
+				clicks.remove(clicks[i]);
+			}
+		}
+		kps = clicks.length;
+	}
 
 	override public function create()
 	{
@@ -307,7 +325,7 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "Paused - " + detailsText;
 
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " , "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " , "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
 		#end
 
 		switch (SONG.song.toLowerCase())
@@ -1013,7 +1031,7 @@ class PlayState extends MusicBeatState
 		healthBar.createFilledBar(p2ColorBar, p1ColorBar);
 		add(healthBar);
 
-		scoreTxt = new FlxText(healthBarBG.x + 100, healthBarBG.y + 45, 0, "", 20);
+		scoreTxt = new FlxText(healthBarBG.x + 50, healthBarBG.y + 45, 0, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
@@ -1227,7 +1245,7 @@ class PlayState extends MusicBeatState
 		{
 			dad.dance();
 			gf.dance();
-			boyfriend.playAnim('idle', true);
+			boyfriend.dance();
 
 			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 			introAssets.set('default', ['ready', "set", "go"]);
@@ -1421,7 +1439,7 @@ class PlayState extends MusicBeatState
 
 		#if windows
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
 		#end
 
 		
@@ -1796,7 +1814,7 @@ class PlayState extends MusicBeatState
 				vocals.pause();
 			}
 			#if windows
-			DiscordClient.changePresence("PAUSED on " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
+			DiscordClient.changePresence("PAUSED on " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
 			#end
 
 			if (!startTimer.finished)
@@ -1822,7 +1840,7 @@ class PlayState extends MusicBeatState
 			#if windows
 			if (startTimer.finished)
 			{
-				DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC, true, songLength - Conductor.songPosition);
+				DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC, true, songLength - Conductor.songPosition);
 			}
 			else
 			{
@@ -1875,7 +1893,7 @@ class PlayState extends MusicBeatState
 		vocals.play();
 
 		#if windows
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
 		#end
 	}
 
@@ -1888,6 +1906,11 @@ class PlayState extends MusicBeatState
 		#if !debug
 		perfectMode = false;
 		#end
+
+		time += elapsed;
+		CalculateKeysPerSecond();
+		if(kps >= kpsMax)
+			kpsMax = kps;
 
 		if (FlxG.keys.justPressed.NINE)
 		{
@@ -2032,7 +2055,7 @@ class PlayState extends MusicBeatState
 		if(songNotesHit == misses)
 			totalAccuracy = 0;
 		
-		scoreTxt.text = "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank;
+		scoreTxt.text = "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank;
 		
 
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
@@ -2312,7 +2335,7 @@ class PlayState extends MusicBeatState
 			
 			#if windows
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("GAME OVER -- " + SONG.song + " (" + storyDifficultyText + ") ","Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
+			DiscordClient.changePresence("GAME OVER -- " + SONG.song + " (" + storyDifficultyText + ") ","Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC);
 			#end
 		}
 
@@ -2868,12 +2891,14 @@ class PlayState extends MusicBeatState
 					if (pressArray[coolNote.noteData])
 					{
 						goodNoteHit(coolNote);
+						clicks.push(time);
 					}
 				}
 			}
 			else
 			{
 				badNoteCheck();
+				clicks.push(time);
 			}
 		}
 
@@ -2882,14 +2907,18 @@ class PlayState extends MusicBeatState
 			notes.forEachAlive(function(daNote:Note)
 				{
 					if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData] && daNote.alpha != 0.1)
+					{
+						
 						goodNoteHit(daNote);
+					}
+					
 				});
 		}
 
 		if (boyfriend.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!holdArray.contains(true) || FlxG.save.data.botAutoPlay))
 				{
 					if (boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && boyfriend.animation.curAnim.curFrame >= 10)
-						boyfriend.playAnim('idle');
+						boyfriend.dance();
 				}
 
 		notes.forEachAlive(function(daNote:Note)
@@ -2956,7 +2985,7 @@ class PlayState extends MusicBeatState
 		if (boyfriend.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!holdArray.contains(true) || FlxG.save.data.botAutoPlay))
 		{
 			if (boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && boyfriend.animation.curAnim.curFrame >= 10)
-				boyfriend.playAnim('idle');
+				boyfriend.dance();
 		}
 
 		if(!FlxG.save.data.botAutoPlay)
@@ -3088,6 +3117,7 @@ class PlayState extends MusicBeatState
 				if (SONG.notes[Math.floor(curSection)].altAnim)
 					altAnim = '-alt';
 			}
+			if(note.altNote) altAnim = '-alt';
 
 			switch (note.noteData)
 			{
@@ -3260,7 +3290,7 @@ class PlayState extends MusicBeatState
 		songLength = FlxG.sound.music.length;
 
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC,true,  songLength - Conductor.songPosition);
+		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") ", "Misses:" + misses + " | " + "Score:" + songScore + " | " + "KPS:" + kps + "(" + kpsMax + ")" + " | " + "Accuracy:" + totalAccuracy + "%" + " | " + "Rank:" + totalRank, iconRPC,true,  songLength - Conductor.songPosition);
 		#end
 	}
 
@@ -3438,7 +3468,7 @@ class PlayState extends MusicBeatState
 
 		if (!boyfriend.animation.curAnim.name.startsWith("sing") && curBeat % 2 == 0)
 		{
-			boyfriend.playAnim('idle', true);
+			boyfriend.dance();
 
 		}
 
