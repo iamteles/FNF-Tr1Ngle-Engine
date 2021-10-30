@@ -645,10 +645,7 @@ class PlayState extends MusicBeatState
 		          {
 		                  defaultCamZoom = 0.9;
 		                  curStage = 'stage';
-		                  var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('stageback'));
-		                  bg.antialiasing = true;
-		                  bg.scrollFactor.set(0.9, 0.9);
-		                  bg.active = false;
+		                  var bg:BGSprite = new BGSprite("stageback", -600, -200, 0.9, 0.9);
 		                  add(bg);
 
 		                  var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('stagefront'));
@@ -2199,24 +2196,42 @@ class PlayState extends MusicBeatState
 				// trace(PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection);
 			}
 
-			if (camFollow.x != dad.getMidpoint().x + 150 && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
+			if (/*camFollow.x != dad.getMidpoint().x + 150 && */!PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
 			{
-				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
+				var camFollowX:Float = dad.getMidpoint().x;
+				var camFollowY:Float = dad.getMidpoint().y;
 
 				switch (dad.curCharacter)
 				{
 					case 'mom':
-						camFollow.y = dad.getMidpoint().y;
+						camFollowY = dad.getMidpoint().y;
 					case 'senpai':
-						camFollow.y = dad.getMidpoint().y - 430;
-						camFollow.x = dad.getMidpoint().x - 100;
+						camFollowY = dad.getMidpoint().y - 400;
+						camFollowX = dad.getMidpoint().x - 250;
 					case 'senpai-angry':
-						camFollow.y = dad.getMidpoint().y - 430;
-						camFollow.x = dad.getMidpoint().x - 100;
+						camFollowY = dad.getMidpoint().y - 400;
+						camFollowX = dad.getMidpoint().x - 250;
+					case 'pico':
+						camFollowY = dad.getMidpoint().y;
+					default:
+						camFollowX = dad.getMidpoint().x;
+						camFollowY = dad.getMidpoint().y;
+						if(dad.animation.curAnim.name.startsWith("singLEFT")){
+							camFollowX = camFollowX - 20;
+						}
+						if(dad.animation.curAnim.name.startsWith("singRIGHT")){
+							camFollowX = camFollowX + 20;
+						}
+						if(dad.animation.curAnim.name.startsWith("singUP")){
+							camFollowY = camFollowY - 20;
+						}
+						if(dad.animation.curAnim.name.startsWith("singDOWN")){
+							camFollowY = camFollowY + 20;
+						}
 				}
 
 				
-
+				camFollow.setPosition(camFollowX + 150, camFollowY - 100);
 
 				if (dad.curCharacter == 'mom')
 					vocals.volume = 1;
@@ -2227,7 +2242,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100)
+			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection/* && camFollow.x != boyfriend.getMidpoint().x - 100*/)
 			{
 				var camFollowX:Float = boyfriend.getMidpoint().x;
 				var camFollowY:Float = boyfriend.getMidpoint().y;
@@ -2245,12 +2260,30 @@ class PlayState extends MusicBeatState
 					case 'schoolEvil':
 						camFollowX = boyfriend.getMidpoint().x - 100;
 						camFollowY = boyfriend.getMidpoint().y - 100;
+					case 'philly':
+						camFollowX = boyfriend.getMidpoint().x;
 					default:
 						camFollowX = boyfriend.getMidpoint().x;
 						camFollowY = boyfriend.getMidpoint().y;
+						if(boyfriend.animation.curAnim.name.startsWith("singLEFT")){
+							camFollowX = camFollowX - 20;
+						}
+						if(boyfriend.animation.curAnim.name.startsWith("singRIGHT")){
+							camFollowX = camFollowX + 20;
+						}
+						if(boyfriend.animation.curAnim.name.startsWith("singUP")){
+							camFollowY = camFollowY - 20;
+						}
+						if(boyfriend.animation.curAnim.name.startsWith("singDOWN")){
+							camFollowY = camFollowY + 20;
+						}
 				}
 
+				
+
 				camFollow.setPosition(camFollowX - 100, camFollowY - 100);
+
+				
 				
 
 				if (SONG.song.toLowerCase() == 'tutorial')
@@ -2527,7 +2560,9 @@ class PlayState extends MusicBeatState
 		}
 
 		if (!inCutscene)
+		{
 			keyShit();
+		}
 		
 
 		#if debug

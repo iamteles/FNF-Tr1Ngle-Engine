@@ -31,6 +31,7 @@ class OptionsMenu extends MusicBeatState
 			new PauseCountdownOption(),
 			new InstantRespawnOption(),
 			new BotOption(),
+			new FramerateOption(),
 			new FPSOption(),
 			new MemoryCounterOption(),
 			new FullscreenOption(),
@@ -183,11 +184,10 @@ class OptionsMenu extends MusicBeatState
 				
 				if (isCat)
 				{
-					if (currentSelectedCat.getOptions()[curSelected].press(true)) {
+					if (currentSelectedCat.getOptions()[curSelected].press(true))
+					{
 						grpControls.remove(grpControls.members[curSelected]);
-
-
-						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true, false);
+						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), currentSelectedCat.getOptions()[curSelected].boldDisplay, false);
 						grpControls.add(ctrl);
 						ctrl.isMenuItem = true;
 						checkBoxesArray[curSelected].sprTracker = grpControls.members[curSelected];
@@ -213,7 +213,7 @@ class OptionsMenu extends MusicBeatState
 							grpControls.clear();
 							for (i in 0...currentSelectedCat.getOptions().length)
 								{
-									var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), true, false);
+									var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), currentSelectedCat.getOptions()[i].boldDisplay, false);
 									controlLabel.isMenuItem = true;
 									controlLabel.targetY = i;
 									grpControls.add(controlLabel);
@@ -231,6 +231,25 @@ class OptionsMenu extends MusicBeatState
                     
 					
 					
+				}
+			}
+			else if(FlxG.keys.justPressed.LEFT && isCat)
+			{
+				if(currentSelectedCat.getOptions()[curSelected].left())
+				{
+					grpControls.remove(grpControls.members[curSelected]);
+					var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), currentSelectedCat.getOptions()[curSelected].boldDisplay, false);
+					grpControls.add(ctrl);
+					ctrl.isMenuItem = true;
+				}
+			}else if (FlxG.keys.justPressed.RIGHT && isCat)
+			{
+				if(currentSelectedCat.getOptions()[curSelected].right())
+				{
+					grpControls.remove(grpControls.members[curSelected]);
+					var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), currentSelectedCat.getOptions()[curSelected].boldDisplay, false);
+					grpControls.add(ctrl);
+					ctrl.isMenuItem = true;
 				}
 			}
 		FlxG.save.flush();
@@ -253,7 +272,9 @@ class OptionsMenu extends MusicBeatState
 			checkbox.sprTracker = grpControls.members[i];
 			// using a FlxGroup is too much fuss!
 			checkBoxesArray.push(checkbox);
-			add(checkbox);
+			if(!currentSelectedCat.getOptions()[i].withoutCheckboxes)
+				add(checkbox);
+			
 		}
 	}
 

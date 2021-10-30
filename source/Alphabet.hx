@@ -141,7 +141,10 @@ class Alphabet extends FlxSpriteGroup
 				{
 					lastWasSpace = true;
 				}
-				if(AlphaCharacter.alphabet.indexOf(d.toLowerCase()) != -1)
+				var isNumber:Bool = AlphaCharacter.numbers.indexOf(d) != -1;
+				var isSymbol:Bool = AlphaCharacter.symbols.indexOf(d) != -1;
+				var isAlphabet:Bool = AlphaCharacter.alphabet.indexOf(d.toLowerCase()) != -1;
+				if((isAlphabet || isSymbol || isNumber))
 				{
 					if(lastSprite != null) a = lastSprite.x + lastSprite.width;
 					if(lastWasSpace)
@@ -152,11 +155,35 @@ class Alphabet extends FlxSpriteGroup
 					var e:AlphaCharacter = new AlphaCharacter(a,0);
 					if(isBold)
 					{
-						e.createBold(d);
+						if (isNumber)
+						{
+							e.createNumber(d);
+						}
+						else if (isSymbol)
+						{
+							e.createSymbol(d);
+						}
+						else
+						{
+							e.createBold(d);
+						}
+						
 					}
 					else
 					{
-						e.createLetter(d);
+						if (isNumber)
+						{
+							e.createNumber(d);
+						}
+						else if (isSymbol)
+						{
+							e.createSymbol(d);
+						}
+						else
+						{
+							e.createLetter(d);
+						}
+						
 					}
 					add(e);
 					lastSprite = e;
@@ -408,19 +435,17 @@ class AlphaCharacter extends FlxSprite
 
 	public function createLetter(letter:String):Void
 	{
+		
 		var letterCase:String = "lowercase";
 		if (letter.toLowerCase() != letter)
 		{
 			letterCase = 'capital';
 		}
-
 		animation.addByPrefix(letter, letter + " " + letterCase, 24);
 		animation.play(letter);
 		updateHitbox();
-
 		FlxG.log.add('the row' + row);
-
-		y = (110 - height);
+		y = (80 - height);
 		y += row * 60;
 	}
 
@@ -428,8 +453,9 @@ class AlphaCharacter extends FlxSprite
 	{
 		animation.addByPrefix(letter, letter, 24);
 		animation.play(letter);
-
 		updateHitbox();
+		y = (80 - height);
+		y += row * 60;
 	}
 
 	public function createSymbol(letter:String)
@@ -438,19 +464,27 @@ class AlphaCharacter extends FlxSprite
 		{
 			case '.':
 				animation.addByPrefix(letter, 'period', 24);
-				animation.play(letter);
-				y += 50;
+				
+				y += 30;
 			case "'":
 				animation.addByPrefix(letter, 'apostraphie', 24);
-				animation.play(letter);
-				y -= 0;
 			case "?":
 				animation.addByPrefix(letter, 'question mark', 24);
-				animation.play(letter);
+				
 			case "!":
 				animation.addByPrefix(letter, 'exclamation point', 24);
-				animation.play(letter);
+			case ":":
+				animation.addByPrefix(letter, ":", 24);
+				y += 40;
+			case "-":
+				animation.addByPrefix(letter, "-", 24);
+				y += 30;
+				x -= 40;
+			default:
+				animation.addByPrefix(letter, letter, 24);
+				
 		}
+		animation.play(letter);
 
 		updateHitbox();
 	}

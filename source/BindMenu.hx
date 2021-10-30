@@ -265,7 +265,7 @@ class BindMenu extends MusicBeatState
             grpControls.add(ctrl);
 
             grpControls2.remove(grpControls2.members[i]);
-            var ctrl2:Alphabet = new Alphabet(0, (70 * i) + 90, (keys[i] != null ? keys[i] : "NOTHING"), false, false);
+            var ctrl2:Alphabet = new Alphabet(0, (70 * i) + 110, (keys[i] != null ? keys[i] : "NOTHING"), false, false);
             ctrl2.ID = i;
             ctrl2.screenCenter(X);
             grpControls2.add(ctrl2);

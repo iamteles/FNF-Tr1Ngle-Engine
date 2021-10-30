@@ -30,6 +30,7 @@ class Main extends Sprite
 	{
 		super();
 
+
 		if (stage != null)
 		{
 			init();
@@ -70,7 +71,8 @@ class Main extends Sprite
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 		
-		
+		if(FlxG.save.data.framerateDraw >= 60 && FlxG.save.data.framerateDraw != null)
+			FlxG.drawFramerate = FlxG.save.data.framerateDraw;
 		
 		#if !mobile
 		

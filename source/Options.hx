@@ -28,6 +28,7 @@ class OptionCatagory
 	}
 
 	private var _name:String = "New Catagory";
+	
 	public final function getName() {
 		return _name;
 	}
@@ -47,6 +48,8 @@ class Option
 	}
 	private var display:String;
 	private var acceptValues:Bool = false;
+	public var withoutCheckboxes:Bool = false;
+	public var boldDisplay:Bool = true;
 	public final function getDisplay():String
 	{
 		return display;
@@ -271,6 +274,44 @@ class FPSOption extends Option
 		return "FPS Counter "/* + (!FlxG.save.data.fps ? "off" : "on")*/;
 	}
 }
+
+class FramerateOption extends Option
+{
+	public function new()
+	{
+		withoutCheckboxes = true;
+		boldDisplay = false;
+		super();
+	}
+	public override function press(changeData:Bool):Bool
+	{
+		withoutCheckboxes = true;
+		boldDisplay = false;
+		return true;
+	}
+	public override function left():Bool
+	{
+		if(FlxG.drawFramerate > 60)
+			FlxG.drawFramerate -= 10;
+		FlxG.save.data.framerateDraw = FlxG.drawFramerate;
+		display = updateDisplay();
+		return true;
+	}
+	public override function right():Bool
+	{
+		if(FlxG.drawFramerate < 360)
+			FlxG.drawFramerate += 10;
+		FlxG.save.data.framerateDraw = FlxG.drawFramerate;
+		display = updateDisplay();
+		return true;
+	}
+	private override function updateDisplay():String
+	{
+		boldDisplay = false;
+		return "Framerate: " + FlxG.drawFramerate/* + (!FlxG.save.data.fps ? "off" : "on")*/;
+	}
+}
+
 
 class ShadersOption extends Option
 {
