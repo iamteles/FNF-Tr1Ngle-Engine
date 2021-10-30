@@ -99,6 +99,8 @@ class PlayState extends MusicBeatState
 	var timeTxt:FlxText;
 
 	private var chromOn:Bool = false;
+	private var vignetteOn:Bool = false;
+	private var vignetteRadius:Float = 0.1;
 
 
 	public var spinCamHud:Bool = false;
@@ -1971,19 +1973,22 @@ class PlayState extends MusicBeatState
 		{
 			if (chromOn)
 			{
-		
 				ch = FlxG.random.int(1,5) / 1000;
 				ch = FlxG.random.int(1,5) / 1000;
 				Shaders.setChrome(ch);
-			
 			}
 			else
 			{
-
-
 				Shaders.setChrome(0);
-			
-			
+			}
+
+			if (vignetteOn)
+			{
+				Shaders.setVignette(vignetteRadius);
+			}
+			else
+			{
+				Shaders.setVignette(0);
 			}
 
 		}
@@ -3409,15 +3414,16 @@ class PlayState extends MusicBeatState
 		if(FlxG.save.data.shadersOn)
 		{
 			if (curBeat > 0 && !shadersLoaded)
-		{
-			shadersLoaded = true;
+			{
+				shadersLoaded = true;
 
-			filters.push(Shaders.chromaticAberration);
+				filters.push(Shaders.chromaticAberration);
 			
-			camfilters.push(Shaders.chromaticAberration);
+				camfilters.push(Shaders.chromaticAberration);
 
+				filters.push(Shaders.vignette);
 
-		}
+			}
 		}
 
 		if (generatedMusic)
@@ -3451,6 +3457,17 @@ class PlayState extends MusicBeatState
 			{
 				chromOn = false;
 				FlxG.log.add('Chromatic Aberrations disabled');
+			}
+			if (SONG.notes[Math.floor(curStep / 16)].vignetteShader)
+			{
+				vignetteOn = true;
+				FlxG.log.add('vignette enabled');
+				vignetteRadius = SONG.notes[Math.floor(curStep / 16)].vignetteShaderRadius;
+			}
+			else
+			{
+				vignetteOn = false;
+				FlxG.log.add('vignette disabled');
 			}
 			if(SONG.notes[Math.floor(curStep / 16)].changeCameraBeat)
 			{

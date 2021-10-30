@@ -23,6 +23,9 @@ typedef SwagSection =
 
 
 	var chromaticAberrationsShader:Bool;
+	
+	var vignetteShader:Bool;
+	var vignetteShaderRadius:Float;
 }
 
 class Section

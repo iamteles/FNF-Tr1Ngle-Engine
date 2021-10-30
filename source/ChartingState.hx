@@ -302,6 +302,7 @@ class ChartingState extends MusicBeatState
 		UI_box.scrollFactor.set();
 
 		FlxG.camera.follow(strumLine);
+
 	}
 
 	var stepperLength:FlxUINumericStepper;
@@ -370,6 +371,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	var check_chrom:FlxUICheckBox;
+	var check_vignetteShader:FlxUICheckBox;
 	var check_changeDad:FlxUICheckBox;
 	var check_changeBF:FlxUICheckBox;
 	var dadDropDown:FlxUIDropDownMenu;
@@ -382,6 +384,8 @@ class ChartingState extends MusicBeatState
 	var cameraBeatZoom:FlxUINumericStepper;
 	var cameraBeatSpeed:FlxUINumericStepper;
 
+	var vignetteShaderRadius:FlxUINumericStepper;
+
 	function addSectionEventsUI():Void
 	{
 		var tab_group_sectionEvents = new FlxUI(null, UI_box);
@@ -389,6 +393,9 @@ class ChartingState extends MusicBeatState
 
 		check_chrom = new FlxUICheckBox(10, 5, null, null, 'Chromatic Aberrations', 100);
 		check_chrom.name = 'check_chrom';
+
+		check_vignetteShader = new FlxUICheckBox(140, 5, null, null, 'Vignette', 100);
+		check_vignetteShader.name = 'check_vignetteShader';
 
 		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
 
@@ -439,8 +446,14 @@ class ChartingState extends MusicBeatState
 		cameraBeatSpeed.value = 4;
 		cameraBeatSpeed.name = 'cameraBeatSpeed';
 
+
+		vignetteShaderRadius = new FlxUINumericStepper(10, 100, 0.05, 0.05, 0.05, 0.4, 2);
+		vignetteShaderRadius.value = 0.1;
+		vignetteShaderRadius.name = 'vignetteShaderRadius';
+
 		var cameraBeatSpeedLabel:FlxText = new FlxText(74,80,'Cam Beat Speed');
 		var cameraBeatZoomLabel:FlxText = new FlxText(74,60,'Cam Beat Zoom');
+		var vignetteRadiusLabel:FlxText = new FlxText(74,100,'Vignette Radius');
 
 		var params:Array<Dynamic> = [];
 
@@ -470,7 +483,13 @@ class ChartingState extends MusicBeatState
 		tab_group_sectionEvents.add(cameraBeatZoomLabel);
 		tab_group_sectionEvents.add(check_changeCameraBeat);
 
+		tab_group_sectionEvents.add(vignetteShaderRadius);
+		tab_group_sectionEvents.add(vignetteRadiusLabel);
+		tab_group_sectionEvents.add(check_vignetteShader);
+
 		UI_box.addGroup(tab_group_sectionEvents);
+
+		updateSectionEventsUI();
 	}
 
 	var stepperSusLength:FlxUINumericStepper;
@@ -568,6 +587,8 @@ class ChartingState extends MusicBeatState
 
 				case "Chromatic Aberrations":
 					_song.notes[curSection].chromaticAberrationsShader = check.checked;
+				case "Vignette":
+					_song.notes[curSection].vignetteShader = check.checked;
 				case "Change Dad Character":
 					_song.notes[curSection].changeDadCharacter = check.checked;
 				case "Change BF Character":
@@ -593,6 +614,11 @@ class ChartingState extends MusicBeatState
 			else if (wname == 'cameraBeatZoom')
 			{
 				_song.notes[curSection].cameraBeatZoom = Std.int(nums.value);
+				updateSectionEventsUI();
+			}
+			else if (wname == 'vignetteShaderRadius')
+			{
+				_song.notes[curSection].vignetteShaderRadius = nums.value;
 				updateSectionEventsUI();
 			}
 			else if (wname == 'song_speed')
@@ -1010,6 +1036,7 @@ class ChartingState extends MusicBeatState
 		var sec = _song.notes[curSection];
 
 		check_chrom.checked = sec.chromaticAberrationsShader;
+		check_vignetteShader.checked = sec.vignetteShader;
 		check_changeBF.checked = sec.changeBFCharacter;
 		check_changeDad.checked = sec.changeDadCharacter;
 		check_changeCameraBeat.checked = sec.changeCameraBeat;
@@ -1019,6 +1046,8 @@ class ChartingState extends MusicBeatState
 		
 		cameraBeatSpeed.value = sec.cameraBeatSpeed;
 		cameraBeatZoom.value = sec.cameraBeatZoom;
+
+		vignetteShaderRadius.value = sec.vignetteShaderRadius;
 
 		updateHeads();
 	}
@@ -1124,6 +1153,8 @@ class ChartingState extends MusicBeatState
 			changeDadCharacter: false,
 			changeDadCharacterChar: "dad",
 			chromaticAberrationsShader: false,
+			vignetteShader: false,
+			vignetteShaderRadius: 0.05,
 			cameraBeatSpeed: 4,
 			cameraBeatZoom: 1,
 			changeCameraBeat: false,
