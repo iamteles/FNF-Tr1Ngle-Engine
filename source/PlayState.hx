@@ -201,6 +201,8 @@ class PlayState extends MusicBeatState
 	public static var noFail:Bool = false;
 	public static var randomNotes:Bool = false;
 
+	public static var seenCutscene:Bool = false;
+
 
 	var spinMicBeat:Int = 0;
 	var spinMicOffset:Int = 4;
@@ -1082,8 +1084,9 @@ class PlayState extends MusicBeatState
 		// cameras = [FlxG.cameras.list[1]];
 		startingSong = true;
 
-		if (isStoryMode)
+		if (isStoryMode && !seenCutscene)
 		{
+			PlayState.seenCutscene = true;
 			switch (curSong.toLowerCase())
 			{
 				case "winter-horrorland":
@@ -2183,7 +2186,7 @@ class PlayState extends MusicBeatState
 				var curTime:Float = FlxG.sound.music.time;
 				if(curTime < 0) curTime = 0;
 				//songPercent = (curTime / songLength);
-				var secondsTotal:Int = Math.floor((songLength - curTime) / 1000);
+				var secondsTotal:Int = Math.floor((FlxG.sound.music.length - curTime) / 1000);
 				if(secondsTotal < 0) secondsTotal = 0;
 				var minutesRemaining:Int = Math.floor(secondsTotal / 60);
 				var secondsRemaining:String = '' + secondsTotal % 60;
@@ -2457,9 +2460,9 @@ class PlayState extends MusicBeatState
 
 					var altAnim:String = "";
 
-					if (SONG.notes[Math.floor(curSection)] != null)
+					if (SONG.notes[Math.floor(Math.floor(curStep / 16))] != null)
 					{
-						if (SONG.notes[Math.floor(curSection)].altAnim)
+						if (SONG.notes[Math.floor(Math.floor(curStep / 16))].altAnim)
 							altAnim = '-alt';
 					}
 					if(daNote.altNote)

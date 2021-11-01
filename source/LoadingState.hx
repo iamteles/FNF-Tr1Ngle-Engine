@@ -251,7 +251,6 @@ class LoadingState extends MusicBeatState
 		var loaded = isSoundLoaded(getSongPath())
 			&& (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath()))
 			&& isLibraryLoaded("shared");
-			&& isImagesLoaded();
 		
 		if (!loaded)
 			return new LoadingState(target, stopMusic);
@@ -273,14 +272,6 @@ class LoadingState extends MusicBeatState
 		return Assets.getLibrary(library) != null;
 	}
 
-	static function isImagesLoaded():Bool
-	{
-		for (i in 0 ... images.length) 
-		{
-			return Assets.cache.hasImage(images[i]) != null;
-		}
-		
-	}
 	#end
 	
 	override function destroy()
