@@ -237,7 +237,7 @@ class LoadingState extends MusicBeatState
 		PlayState.instaFail = false;
 		PlayState.noFail = false;
 		PlayState.randomNotes = false;
-		
+		PlayState.seenCutscene = false;
 		
 		
 			
