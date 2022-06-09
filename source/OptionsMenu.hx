@@ -24,21 +24,21 @@ class OptionsMenu extends MusicBeatState
 
 	var options:Array<OptionCatagory> = [
 		new OptionCatagory("Preferences", [
-			new DownscrollOption(),
-			new MiddlescrollOption(),
 			new HitsoundsOption(),
-			new BGForNotesOption(),
 			new PauseCountdownOption(),
 			new InstantRespawnOption(),
+			new OffsetsOption(),
+			new CalibrateOffsetsOption(),
 			new BotOption(),
 			new FramerateOption(),
 			new FPSOption(),
 			new MemoryCounterOption(),
 			new FullscreenOption(),
 			new ShadersOption(),
-			new PreloadImagesOption()
-			
+			new PreloadImagesOption(),
+			new SkillIssueOption()
 		]),
+		new OptionCatagory("Appearance",[]),
 		new OptionCatagory("Controls",[]),
 		new OptionCatagory("Exit",[]),
 	];
@@ -53,7 +53,8 @@ class OptionsMenu extends MusicBeatState
 
 	override function create()
 	{
-		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image("menuDesat"));
+		
+		var menuBG:Sprite = new Sprite().loadGraphics(Paths.image("menuDesat"));
 
 		menuBG.color = 0xFFea71fd;
 		menuBG.setGraphicSize(Std.int(menuBG.width * 1.1));
@@ -103,7 +104,8 @@ class OptionsMenu extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
+		Conductor.offset = FlxG.save.data.notesOffset;
+		FlxG.fullscreen = FlxG.save.data.fullscreen;
 		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
 
 		if(!isCat)
@@ -148,9 +150,9 @@ class OptionsMenu extends MusicBeatState
 				curSelected = 0;
 				changeSelection(0);
 			}
-			if (FlxG.keys.justPressed.UP)
+			if (controls.UP_PUI)
 				changeSelection(-1);
-			if (FlxG.keys.justPressed.DOWN)
+			if (controls.DOWN_PUI)
 				changeSelection(1);
 			
 			if (isCat)
@@ -159,16 +161,16 @@ class OptionsMenu extends MusicBeatState
 				{
 					if (FlxG.keys.pressed.SHIFT)
 						{
-							if (FlxG.keys.pressed.RIGHT)
+							if (controls.RIGHTUI)
 								currentSelectedCat.getOptions()[curSelected].right();
-							if (FlxG.keys.pressed.LEFT)
+							if (controls.LEFTUI)
 								currentSelectedCat.getOptions()[curSelected].left();
 						}
 					else
 					{
-						if (FlxG.keys.justPressed.RIGHT)
+						if (controls.RIGHTUI)
 							currentSelectedCat.getOptions()[curSelected].right();
-						if (FlxG.keys.justPressed.LEFT)
+						if (controls.LEFTUI)
 							currentSelectedCat.getOptions()[curSelected].left();
 					}
 				}
@@ -202,6 +204,10 @@ class OptionsMenu extends MusicBeatState
 						{
 							FlxG.switchState(new BindMenu());
 						}
+						else if(options[curSelected].getName() == "Appearance")
+						{
+							FlxG.switchState(new AppearanceMenu());
+						}
 						else if(options[curSelected].getName() == "Exit")
 						{
 							FlxG.switchState(new MainMenuState());
@@ -233,7 +239,7 @@ class OptionsMenu extends MusicBeatState
 					
 				}
 			}
-			else if(FlxG.keys.justPressed.LEFT && isCat)
+			else if(controls.LEFT_PUI && isCat)
 			{
 				if(currentSelectedCat.getOptions()[curSelected].left())
 				{
@@ -242,7 +248,7 @@ class OptionsMenu extends MusicBeatState
 					grpControls.add(ctrl);
 					ctrl.isMenuItem = true;
 				}
-			}else if (FlxG.keys.justPressed.RIGHT && isCat)
+			}else if (controls.RIGHT_PUI && isCat)
 			{
 				if(currentSelectedCat.getOptions()[curSelected].right())
 				{

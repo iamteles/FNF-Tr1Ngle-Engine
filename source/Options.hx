@@ -7,6 +7,11 @@ import openfl.display.FPS;
 import openfl.Lib;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
+#if windows
+import sys.io.Process;
+#end
+import flixel.math.FlxMath;
+using StringTools;
 
 class OptionCatagory
 {
@@ -68,7 +73,6 @@ class Option
 }
 
 
-
 class DownscrollOption extends Option
 {
 	public function new()
@@ -88,6 +92,36 @@ class DownscrollOption extends Option
 	private override function updateDisplay():String
 	{
 		return "Downscroll "/* + (!FlxG.save.data.downscroll ? "off" : "on")*/;
+	}
+}
+
+class SkillIssueOption extends Option
+{
+	public function new()
+	{
+		super();
+	}
+	public override function press(changeData:Bool):Bool
+	{
+		if(changeData)
+		{
+			FlxG.save.data.skillIssue = !FlxG.save.data.skillIssue;
+			if(FlxG.save.data.skillIssue)
+			{
+				#if windows
+				// should open skillIssue message box but idfk how :skull:
+				#end
+			}
+		}
+			
+		acceptValues = FlxG.save.data.skillIssue;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Ghost Tapping";
 	}
 }
 
@@ -213,6 +247,7 @@ class PreloadImagesOption extends Option
 
 	public override function press(changeData:Bool):Bool
 	{
+		
 		if(changeData)
 			FlxG.save.data.preloadCharacters = !FlxG.save.data.preloadCharacters;
 		FlxGraphic.defaultPersist = FlxG.save.data.preloadCharacters;
@@ -292,16 +327,18 @@ class FramerateOption extends Option
 	public override function left():Bool
 	{
 		if(FlxG.drawFramerate > 60)
-			FlxG.drawFramerate -= 10;
+			FlxG.drawFramerate -= 1 * (FlxG.keys.pressed.SHIFT || FlxG.keys.pressed.CONTROL ? 10 : 1);
 		FlxG.save.data.framerateDraw = FlxG.drawFramerate;
+		FlxG.updateFramerate = FlxG.drawFramerate;
 		display = updateDisplay();
 		return true;
 	}
 	public override function right():Bool
 	{
 		if(FlxG.drawFramerate < 360)
-			FlxG.drawFramerate += 10;
+			FlxG.drawFramerate += 1 * (FlxG.keys.pressed.SHIFT || FlxG.keys.pressed.CONTROL ? 10 : 1);
 		FlxG.save.data.framerateDraw = FlxG.drawFramerate;
+		FlxG.updateFramerate = FlxG.drawFramerate;
 		display = updateDisplay();
 		return true;
 	}
@@ -312,7 +349,78 @@ class FramerateOption extends Option
 	}
 }
 
+class OffsetsOption extends Option
+{
+	public function new()
+	{
+		withoutCheckboxes = true;
+		boldDisplay = false;
+		super();
+		display = updateDisplay();
+	}
+	public override function press(changeData:Bool):Bool
+	{
+		withoutCheckboxes = true;
+		boldDisplay = false;
+		display = updateDisplay();
+		return true;
+	}
+	public override function left():Bool
+	{
+		if(FlxG.save.data.notesOffset > -300)
+			FlxG.save.data.notesOffset -= 0.1 * (FlxG.keys.pressed.SHIFT || FlxG.keys.pressed.CONTROL ? 10 : 1);
+		if(FlxG.save.data.notesOffset < -300)
+			FlxG.save.data.notesOffset = -300;
+		FlxG.save.data.notesOffset = FlxMath.roundDecimal(FlxG.save.data.notesOffset, 1);
+		Conductor.offset = FlxG.save.data.notesOffset;
+		
+		display = updateDisplay();
+		return true;
+	}
+	public override function right():Bool
+	{
+		if(FlxG.save.data.notesOffset < 300)
+			FlxG.save.data.notesOffset += 0.1 * (FlxG.keys.pressed.SHIFT || FlxG.keys.pressed.CONTROL ? 10 : 1);
+		if(FlxG.save.data.notesOffset > 300)
+			FlxG.save.data.notesOffset = 300;
+		FlxG.save.data.notesOffset = FlxMath.roundDecimal(FlxG.save.data.notesOffset, 1);
+		Conductor.offset = FlxG.save.data.notesOffset;
+		display = updateDisplay();
+		return true;
+	}
+	private override function updateDisplay():String
+	{
+		Conductor.offset = FlxG.save.data.notesOffset;
+		boldDisplay = false;
+		return "Offset: " + Conductor.offset;
+	}
+}
+class CalibrateOffsetsOption extends Option
+{
+	public function new()
+	{
+		withoutCheckboxes = true;
+		boldDisplay = true;
+		super();
+	}
+	public override function press(changeData:Bool):Bool
+	{
+		withoutCheckboxes = true;
+		boldDisplay = true;
+		if(changeData){
+			FlxG.sound.music.stop();
+			FlxG.switchState(new CalibrateOffsetsState());
+		}
+		
 
+		return true;
+	}
+	private override function updateDisplay():String
+	{
+		boldDisplay = true;
+		return "Calibrate Offsets";
+	}
+}
 class ShadersOption extends Option
 {
 	public function new()
@@ -347,7 +455,6 @@ class MemoryCounterOption extends Option
 		if(changeData)
 		{
 			FlxG.save.data.mem = !FlxG.save.data.mem;
-			(cast (Lib.current.getChildAt(0), Main)).toggleMem(FlxG.save.data.mem);
 		}
 		
 		acceptValues = FlxG.save.data.mem;
@@ -384,8 +491,3 @@ class FullscreenOption extends Option
 		return "Fullscreen "/* + (!FlxG.save.data.fullscreen ? "off" : "on")*/;
 	}
 }
-
-
-
-
-

@@ -27,7 +27,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	var pauseMusic:FlxSound;
 
-	public function new(x:Float, y:Float)
+	public function new()
 	{
 		super();
 
@@ -242,7 +242,6 @@ class PauseSubState extends MusicBeatSubstate
 	override function destroy()
 	{
 		pauseMusic.destroy();
-
 		super.destroy();
 	}
 
