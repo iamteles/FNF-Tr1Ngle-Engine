@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxCamera;
 import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.Assets;

@@ -52,4 +52,5 @@ class Shaders
 			aaa = pixelSize;
 		pixelate.shader.data.pixelSize.value = [pixelSize != 0 ? aaa : 0];
 	}
+
 }

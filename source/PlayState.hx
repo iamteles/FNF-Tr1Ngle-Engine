@@ -201,7 +201,6 @@ class PlayState extends MusicBeatState
 	public static var daPixelZoom:Float = 6;
 
 
-
 	// week 1 shit
 
 	var backDudes:Sprite;
@@ -1912,22 +1911,19 @@ class PlayState extends MusicBeatState
 			if(FlxG.save.data.middlescroll)
 				babyArrow.alpha = 0;
 
-			if(doEffect)
+			if(doEffect && !FlxG.save.data.middlescroll)
 			{
 				if (!isStoryMode)
 				{	
 					babyArrow.y -= 10;
 					babyArrow.alpha = 0;
-					if(!FlxG.save.data.middlescroll)
-						FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+					FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 				}
 				else
 				{	
 					FlxG.save.data.downscroll ? babyArrow.y += 100 : babyArrow.y -= 100;
-					if(!FlxG.save.data.middlescroll)
-						babyArrow.alpha = 0.4;
-					if(!FlxG.save.data.middlescroll)
-						FlxTween.tween(babyArrow, {y: FlxG.save.data.downscroll ? babyArrow.y - 100 : babyArrow.y + 100, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.6 + (0.15 * i)});
+					babyArrow.alpha = 0.4;
+					FlxTween.tween(babyArrow, {y: FlxG.save.data.downscroll ? babyArrow.y - 100 : babyArrow.y + 100, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.6 + (0.15 * i)});
 				}
 			}
 
@@ -3880,6 +3876,7 @@ class PlayState extends MusicBeatState
 
 				filters.push(Shaders.pixelate);
 				filters.push(Shaders.vignette);
+
 			}
 		}
 
