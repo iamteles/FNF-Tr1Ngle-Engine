@@ -479,7 +479,7 @@ class Character extends Sprite
 			holdTimer = 0;
 		if (holdTimer > Conductor.stepCrochet * 4 * 0.001)
 		{
-			if (animation.curAnim.name.startsWith('sing') && !animation.curAnim.name.endsWith('miss') && animation.curAnim.curFrame >= 10 && animation.curAnim.name != "spinMic" || (animation.curAnim.name == "spinMic" && animation.curAnim.finished))
+			if ((animation.curAnim.name.startsWith('sing') && animation.curAnim.finished) && animation.curAnim.name != "spinMic" || (animation.curAnim.name == "spinMic" && animation.curAnim.finished))
 				dance();
 		}
 		
