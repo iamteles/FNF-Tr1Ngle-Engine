@@ -726,6 +726,8 @@ class EventsEditorState extends MusicBeatState
 			FlxG.sound.music.stop();
 			vocals1.stop();
 			vocals2.stop();
+			if(instAudioBuffer != null)
+				instAudioBuffer.dispose();
 			FlxG.switchState(new PlayState());
 		}
 

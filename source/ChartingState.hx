@@ -825,9 +825,12 @@ class ChartingState extends MusicBeatState
 			FlxG.sound.music.stop();
 			vocals1.stop();
 			vocals2.stop();
-			vocals2AudioBuffer.dispose();
-			vocals1AudioBuffer.dispose();
-			instAudioBuffer.dispose();
+			if(vocals2AudioBuffer != null)
+				vocals2AudioBuffer.dispose();
+			if(vocals1AudioBuffer != null)
+				vocals1AudioBuffer.dispose();
+			if(instAudioBuffer != null)
+				instAudioBuffer.dispose();
 			FlxG.switchState(new PlayState());
 		}
 
