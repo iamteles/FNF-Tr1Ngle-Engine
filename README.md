@@ -1,9 +1,7 @@
-# Friday Night Funkin': Tr1Ngle Engine
+# FNF': Tr1Ngle Engine - Stable version 1.7.0
 ![](assets/preload/images/Logo_TE_x_FNF.png)
 
-![GitHub all releases](https://img.shields.io/github/downloads/Tr1NgleDev/Tr1Ngle-Engine/total?style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Tr1NgleDev/Tr1Ngle-Engine?label=version&style=flat-square) ![GitHub repo size](https://img.shields.io/github/repo-size/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square) ![GitHub closed issues](https://img.shields.io/github/issues-closed/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square) ![GitHub issues](https://img.shields.io/github/issues/Tr1NgleDev/Tr1Ngle-Engine?style=flat-square)
-
-**You can use Tr1Ngle Engine as long as you credit me.**
+This is an archive of the final public version of Tr1Ngle Engine, version 1.7.0. You should not use this in any new mods and this branch exists only for archival purposes.
 
 ## Features:
 - **Events System**
@@ -40,7 +38,7 @@ OG Friday Night Funkin' -
 -   [Kawai Sprite](https://twitter.com/kawaisprite "Kawai Sprite") - Music
 
 Tr1Ngle Engine -
--   [Tr1NgleDev](https://gamebanana.com/members/1845547 "Tr1NgleDev") (me lol) - Coding, a bit of art
+-   [Tr1NgleDev](https://gamebanana.com/members/1845547 "Tr1NgleDev") - Coding, a bit of art
 -   [Astro_Galaxy](https://gamebanana.com/members/1848784 "Astro_Galaxy") - **Amazing** art
 -   [Teles](https://gamebanana.com/members/1894648 "Teles") - Input system, Beta Testing, Miss sprite
 -   [MarcoTonni](https://gamebanana.com/members/1858469 "MarcoTonni") - Beta Testing, Ideas
