@@ -106,7 +106,6 @@ class OptionsMenu extends MusicBeatState
 		super.update(elapsed);
 		Conductor.offset = FlxG.save.data.notesOffset;
 		FlxG.fullscreen = FlxG.save.data.fullscreen;
-		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
 
 		if(!isCat)
 		{

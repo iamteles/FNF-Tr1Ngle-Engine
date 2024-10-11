@@ -324,7 +324,7 @@ class Note extends Sprite
 				canBeHit = true;
 			else
 				canBeHit = false;
-
+			
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
 				tooLate = true;
 
@@ -342,7 +342,6 @@ class Note extends Sprite
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
-
 		
 	}
 }

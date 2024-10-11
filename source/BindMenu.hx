@@ -183,9 +183,6 @@ class BindMenu extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-        FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
-        
-
         switch(state){
 
             case "select":

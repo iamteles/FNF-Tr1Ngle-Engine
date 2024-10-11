@@ -23,7 +23,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
@@ -172,7 +172,7 @@ class ChartingState extends MusicBeatState
 		if(lastSection < _song.notes.length)
 			curSection = lastSection;
 		FlxG.mouse.visible = true;
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('tr1ngle-engine', 'teles');
 
 		tempBpm = _song.bpm;
 

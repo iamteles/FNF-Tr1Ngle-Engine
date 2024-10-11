@@ -28,7 +28,6 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.FlxSubState;
 import openfl.display.Shader;
-import openfl.filters.ShaderFilter;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.effects.FlxTrailArea;
@@ -38,12 +37,11 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.graphics.atlas.FlxAtlas;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import openfl.filters.ShaderFilter;
 import openfl.filters.BitmapFilter;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -87,7 +85,6 @@ class PlayState extends MusicBeatState
 	private var dad:Character;
 	private var gf:Character;
 	private var boyfriend:Boyfriend;
-	private var shadersLoaded:Bool = false;
 
 	private var notes:FlxTypedGroup<Note>;
 	private var unspawnNotes:Array<Note> = [];
@@ -116,14 +113,6 @@ class PlayState extends MusicBeatState
 
 	var timeTxt:FlxText;
 
-	private var chromOn:Bool = false;
-	private var invertOn:Bool = false;
-	private var pixelateOn:Bool = false;
-	private var pixelateShaderPixelSize:Float = 80;
-	private var grayScaleOn:Bool = false;
-	private var vignetteOn:Bool = false;
-	private var vignetteRadius:Float = 0.1;
-
 
 	public var spinCamHud:Bool = false;
 	public var spinCamGame:Bool = false;
@@ -143,8 +132,7 @@ class PlayState extends MusicBeatState
 
 	private var gfSpeed:Int = 1;
 	private var health:Float = 1;
-	var filters:Array<BitmapFilter> = [];
-	var camfilters:Array<BitmapFilter> = [];
+	
 	private var combo:Int = 0;
 	private var misses:Int = 0;
 	var totalAccuracy:Float = 0;
@@ -196,6 +184,7 @@ class PlayState extends MusicBeatState
 	public static var campaignScore:Int = 0;
 
 	public var defaultCamZoom:Float = 1.05;
+	public var camHudZoom:Float = 1;
 
 	// how big to stretch the pixel art assets
 	public static var daPixelZoom:Float = 6;
@@ -207,9 +196,6 @@ class PlayState extends MusicBeatState
 	var centralDudes:Sprite;
 	var frontDudes:Sprite;
 
-
-
-	var ch = 2 / 1000;
 
 	var inCutscene:Bool = false;
 
@@ -243,9 +229,7 @@ class PlayState extends MusicBeatState
 
 
 	public var limoSpeaker:Sprite;
-
 	public static var functionsList:Array<String> = ["testFunction"];
-
 	public static function testFunction()
 	{
 		trace("you called a function using event note");
@@ -270,11 +254,11 @@ class PlayState extends MusicBeatState
 		}
 		kps = clicks.length;
 	}
-
+	public var shaderObject:Shaders;
 	override public function create()
 	{
-
 		instance = this;
+		
 		Bind.keyCheck();
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
@@ -286,6 +270,7 @@ class PlayState extends MusicBeatState
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		var noteSplash0:NoteSplash = new NoteSplash(100, 100, 0);
+		noteSplash0.visible = false;
 		grpNoteSplashes.add(noteSplash0);
 
 		FlxG.cameras.reset(camGame);
@@ -293,9 +278,12 @@ class PlayState extends MusicBeatState
 
 		FlxCamera.defaultCameras = [camGame];
 
-		camGame.setFilters(filters);
+		// shaders
+		shaderObject = new Shaders();
+		add(shaderObject);
+		camGame.filters = shaderObject.gameFilters;
 		camGame.filtersEnabled = true;
-		camHUD.setFilters(camfilters);
+		camHUD.filters = shaderObject.hudFilters;
 		camHUD.filtersEnabled = true;
 
 		persistentUpdate = true;
@@ -386,6 +374,7 @@ class PlayState extends MusicBeatState
 		#end
 		var stageLights:Sprite;
 		var stageCurtains:Sprite;
+		var gfVersion:String = 'gf';
 		switch (SONG.song.toLowerCase())
 		{
                         case 'spookeez' | 'monster' | 'south': 
@@ -758,7 +747,7 @@ class PlayState extends MusicBeatState
 		          }
               }
 			
-		var gfVersion:String = 'gf';
+		
 		switch (curStage)
 		{
 			case 'limo':
@@ -770,9 +759,6 @@ class PlayState extends MusicBeatState
 			case 'schoolEvil':
 				gfVersion = 'gf-pixel';
 		}
-
-		if (curStage == 'limo')
-			gfVersion = 'gf-car';
 
 		gf = new Character(400, 130, gfVersion);
 		gf.scrollFactor.set(0.95, 0.95);
@@ -1035,7 +1021,7 @@ class PlayState extends MusicBeatState
 
 		add(camFollow);
 
-		FlxG.camera.follow(camFollow, LOCKON, 0.04);
+		//FlxG.camera.follow(camFollow, LOCKON, 0.04);
 		// FlxG.camera.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.camera.focusOn(camFollow.getPosition());
@@ -2083,13 +2069,11 @@ class PlayState extends MusicBeatState
 				// phillyCityLights.members[curLight].alpha -= (Conductor.crochet / 1000) * FlxG.elapsed;
 		}
 
-
-
-		
-		
 		super.update(elapsed);
 
-		FlxG.camera.followLerp = CoolUtil.camLerpShit(0.04);
+		var followLerp:Float = 5 * elapsed;
+		if(followLerp > 1) followLerp = 1;
+		CoolUtil.newCamLerp(camGame, camFollow, followLerp);
 
 		if(totalAccuracy >= maxTotalAccuracy)
 			maxTotalAccuracy = totalAccuracy;
@@ -2112,40 +2096,6 @@ class PlayState extends MusicBeatState
 		if(spinEnemyNotes)
 		{
 			spinEnemyStrumLineNotes();
-		}
-
-		
-
-		if(FlxG.save.data.shadersOn)
-		{
-			if (chromOn)
-			{
-				ch = FlxG.random.int(1,5) / 1000;
-				ch = FlxG.random.int(1,5) / 1000;
-				Shaders.setChrome(ch);
-			}
-			else
-			{
-				Shaders.setChrome(0);
-			}
-			if (vignetteOn)
-			{
-				Shaders.setVignette(vignetteRadius);
-			}
-			else
-			{
-				Shaders.setVignette(0);
-			}
-			Shaders.setGrayScale((grayScaleOn == true ? 1 : 0));
-			Shaders.setInvertColor((invertOn == true ? 1 : 0));
-			if (pixelateOn)
-			{
-				Shaders.setPixelation(pixelateShaderPixelSize);
-			}
-			else
-			{
-				Shaders.setPixelation(0);
-			}
 		}
 
 		// ranking system
@@ -2475,7 +2425,7 @@ class PlayState extends MusicBeatState
 		if (camZooming)
 		{
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom - (curStage == "limo" ? 0.125 : 0), FlxG.camera.zoom, 0.95);
-			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
+			camHUD.zoom = FlxMath.lerp(camHudZoom, camHUD.zoom, 0.95);
 
 			FlxG.camera.angle = FlxMath.lerp(camRot, FlxG.camera.angle, 0.95);
 			camHUD.angle = FlxMath.lerp(camHUDRot, camHUD.angle, 0.95);
@@ -2635,6 +2585,7 @@ class PlayState extends MusicBeatState
 				if(daNote.eventNote && daNote.wasGoodHit)
 				{
 					var event:String = daNote.eventType;
+					// OLD EVENTS
 					switch(event)
 					{
 						case "changeDadCharacter":
@@ -2642,11 +2593,11 @@ class PlayState extends MusicBeatState
 						case "changeBFCharacter":
 							changeBFCharacter(daNote.eventArgs[0], daNote.eventArgs[1], daNote.eventArgs[2]);
 						case "chromaticAberrations":
-							chromOn = daNote.eventArgs[0] == "ENABLE";
+							//chromOn = daNote.eventArgs[0] == "ENABLE";
 						case "vignette":
 							//trace("vignette" + " " + daNote.eventArgs[0] + " " + daNote.eventArgs[1]);
-							vignetteOn = daNote.eventArgs[0] == "ENABLE";
-							vignetteRadius = daNote.eventArgs[1];
+							//vignetteOn = daNote.eventArgs[0] == "ENABLE";
+							//vignetteRadius = daNote.eventArgs[1];
 						case "changeCameraBeat":
 							//trace("a");
 							cameraBeatZoom = 0.025 * daNote.eventArgs[0];
@@ -2678,15 +2629,15 @@ class PlayState extends MusicBeatState
 							pointAtGF = daNote.eventArgs[0] == "ENABLE";
 						case "grayScale":
 							//trace(daNote.eventArgs[0]);
-							grayScaleOn = daNote.eventArgs[0] == "ENABLE";
+							//grayScaleOn = daNote.eventArgs[0] == "ENABLE";
 						case "invertColor":
 							//trace(daNote.eventArgs[0]);
-							invertOn = daNote.eventArgs[0] == "ENABLE";
+							//invertOn = daNote.eventArgs[0] == "ENABLE";
 						case "pixelate":
 							//trace(daNote.eventArgs[0]);
 							//trace(daNote.eventArgs[1]);
-							pixelateOn = daNote.eventArgs[0] == "ENABLE";
-							pixelateShaderPixelSize = daNote.eventArgs[1];
+							//pixelateOn = daNote.eventArgs[0] == "ENABLE";
+							//pixelateShaderPixelSize = daNote.eventArgs[1];
 						case "zoomCam":
 							FlxG.camera.zoom += 0.025 * daNote.eventArgs[0];
 							camHUD.zoom += 0.025 * daNote.eventArgs[0] * 2;
@@ -2701,13 +2652,132 @@ class PlayState extends MusicBeatState
 							wavyStrumLineNotes = daNote.eventArgs[0] == "ENABLE";
 						case "countdown":
 							startFakeCountdown(daNote.eventArgs[0] == "With Sound");
-						case "callFunction": // ayo wtf callFunction note
+						case "callFunction": // ayo wtf callFunction event
 							if(Reflect.field(PlayState, daNote.eventArgs[0]) != null)
 							{
 								Reflect.callMethod(PlayState, Reflect.field(PlayState, daNote.eventArgs[0]), []);
 							}
 						case "flashCamera":
 							FlxG.camera.flash(FlxColor.WHITE, daNote.eventArgs[0]);
+					}
+					// new events 1.7.5 momento :)
+					switch(event)
+					{
+						case "CameraBeat":
+							cameraBeatZoom = 0.025 * daNote.eventArgs[0];
+							cameraBeatSpeed = daNote.eventArgs[1];
+						case "Countdown":
+							startFakeCountdown(daNote.eventArgs[0] == "With Sound");
+						case "WavyStrumLine":
+							wavyStrumLineNotes = daNote.eventArgs[0] == "ENABLE";
+						case "ChangeScrollSpeed":
+							speed = daNote.eventArgs[0];
+						case "CallFunc":
+							if(Reflect.field(PlayState, daNote.eventArgs[0]) != null)
+								Reflect.callMethod(PlayState, Reflect.field(PlayState, daNote.eventArgs[0]), []);
+
+						case "Shader": // one more big event omg wtf
+							switch (daNote.eventArgs[0]) // shader effect
+							{
+								case "Chromatic":
+									shaderObject.triggerChromatic(daNote.eventArgs[3] == "Random", daNote.eventArgs[4], daNote.eventArgs[5], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Bulge":
+									shaderObject.triggerBulge(daNote.eventArgs[3], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Glitch":
+									shaderObject.triggerGlitch(daNote.eventArgs[3], daNote.eventArgs[4], daNote.eventArgs[5], daNote.eventArgs[6], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Grayscale":
+									shaderObject.triggerGrayscale(daNote.eventArgs[3], daNote.eventArgs[7], daNote.eventArgs[4] / 255.0, daNote.eventArgs[5] / 255.0, daNote.eventArgs[6] / 255.0, daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Hue":
+									shaderObject.triggerHue(daNote.eventArgs[3], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Invert":
+									shaderObject.triggerInvert(daNote.eventArgs[4], daNote.eventArgs[5], daNote.eventArgs[6], daNote.eventArgs[3], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "LensCircle":
+									shaderObject.triggerLensCircle(daNote.eventArgs[11], daNote.eventArgs[8], daNote.eventArgs[9], daNote.eventArgs[10], daNote.eventArgs[3], daNote.eventArgs[4], daNote.eventArgs[5], daNote.eventArgs[6], daNote.eventArgs[7], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Sepia":
+									shaderObject.triggerSepia(daNote.eventArgs[3], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "SplitScreen":
+									shaderObject.triggerSplitScreen(daNote.eventArgs[3], daNote.eventArgs[4], daNote.eventArgs[1], daNote.eventArgs[2]);
+								case "Pixelate":
+									shaderObject.triggerPixelate(daNote.eventArgs[3], daNote.eventArgs[4], daNote.eventArgs[1], daNote.eventArgs[2]);
+							}
+
+						case "Camera": // big event omg im tired making it lol
+							switch(daNote.eventArgs[1])
+							{
+								case "Change Zoom":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											defaultCamZoom = daNote.eventArgs[0 + 2];
+										case "HUD":
+											camHudZoom = daNote.eventArgs[0 + 2];
+										case "Both":
+											defaultCamZoom = daNote.eventArgs[0 + 2];
+											camHudZoom = daNote.eventArgs[0 + 2];
+									}
+								case "Change Rotation":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											camRot = daNote.eventArgs[0 + 2];
+										case "HUD":
+											camHUDRot = daNote.eventArgs[0 + 2];
+										case "Both":
+											camRot = daNote.eventArgs[0 + 2];
+											camHUDRot = daNote.eventArgs[0 + 2];
+									}
+								case "Zoom":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											FlxG.camera.zoom += 0.025 * daNote.eventArgs[0 + 2];
+										case "HUD":
+											camHUD.zoom += 0.025 * daNote.eventArgs[0 + 2] * 2;
+										case "Both":
+											FlxG.camera.zoom += 0.025 * daNote.eventArgs[0 + 2];
+											camHUD.zoom += 0.025 * daNote.eventArgs[0 + 2] * 2;
+									}
+								case "Rotate":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											FlxG.camera.angle += daNote.eventArgs[0 + 2];
+										case "HUD":
+											camHUD.angle += daNote.eventArgs[0 + 2];
+										case "Both":
+											FlxG.camera.angle += daNote.eventArgs[0 + 2];
+											camHUD.angle += daNote.eventArgs[0 + 2];
+									}
+								case "Flash":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											FlxG.camera.flash(FlxColor.fromRGB(daNote.eventArgs[1 + 2], daNote.eventArgs[2 + 2], daNote.eventArgs[3 + 2]), daNote.eventArgs[0 + 2]);
+										case "HUD":
+											camHUD.flash(FlxColor.fromRGB(daNote.eventArgs[1 + 2], daNote.eventArgs[2 + 2], daNote.eventArgs[3 + 2]), daNote.eventArgs[0 + 2]);
+										case "Both":
+											FlxG.camera.flash(FlxColor.fromRGB(daNote.eventArgs[1 + 2], daNote.eventArgs[2 + 2], daNote.eventArgs[3 + 2]), daNote.eventArgs[0 + 2]);
+											camHUD.flash(FlxColor.fromRGB(daNote.eventArgs[1 + 2], daNote.eventArgs[2 + 2], daNote.eventArgs[3 + 2]), daNote.eventArgs[0 + 2]);
+									}
+								case "Shake":
+									switch(daNote.eventArgs[0])
+									{
+										case "Game":
+											FlxG.camera.shake(daNote.eventArgs[0 + 2] / 100, daNote.eventArgs[1 + 2]);
+										case "HUD":
+											camHUD.shake(daNote.eventArgs[0 + 2] / 100, daNote.eventArgs[1 + 2]);
+										case "Both":
+											camHUD.shake(daNote.eventArgs[0 + 2] / 100, daNote.eventArgs[1 + 2]);
+											FlxG.camera.shake(daNote.eventArgs[0 + 2] / 100, daNote.eventArgs[1 + 2]);
+									}
+
+								case "Point At GF" | "Point At GF [Game]": // GAME Cam only
+									pointAtGF = daNote.eventArgs[0 + 2] == "ENABLE";
+								case "Point" | "Point [Game]": // GAME Cam only
+									camPointEventEnabled = daNote.eventArgs[0 + 2] == "ENABLE";
+									camPointEventX = daNote.eventArgs[1 + 2];
+									camPointEventY = daNote.eventArgs[2 + 2];
+							}
 					}
 					daNote.kill();
 					notes.remove(daNote, true);
@@ -2969,6 +3039,7 @@ class PlayState extends MusicBeatState
 	{
 		var a:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 		a.setupNoteSplash(note.x, note.y, note.noteData);
+		a.visible = true;
 		grpNoteSplashes.add(a);
 	}
 	function generateJudgementSprite()
@@ -3218,11 +3289,93 @@ class PlayState extends MusicBeatState
 			releaseArray = [false, false, false, false];
 		}
 	 
-		// FlxG.watch.addQuick('asdfa', upP);
-		if (pressArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
+		if (holdArray.contains(true) && generatedMusic)
+		{
+			notes.forEachAlive(function(daNote:Note)
+			{
+				if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData])
+					goodNoteHit(daNote);
+			});
+		}
+
+		if (pressArray.contains(true) && generatedMusic)
 		{
 
 			boyfriend.holdTimer = 0;
+
+			var possibleNotes:Array<Note> = [];
+			var ignoreList:Array<Int> = [];
+			var f:Array<Note> = [];
+
+			notes.forEachAlive(function(a:Note)
+			{
+				if(a.canBeHit && a.mustPress && !a.tooLate && !a.wasGoodHit)
+				{
+					if(ignoreList.contains(a.noteData))
+					{
+						for(b in 0...possibleNotes.length)
+						{
+							var c = possibleNotes[b];
+							if(c.noteData == a.noteData && 10 > Math.abs(a.strumTime - c.strumTime))
+							{
+								f.push(a);
+								break;
+							}
+							else if(c.noteData == a.noteData && a.strumTime < c.strumTime)
+							{
+								possibleNotes.remove(c);
+								possibleNotes.push(a);
+								break;
+							}
+						}
+					}
+					else
+					{
+						possibleNotes.push(a);
+						ignoreList.push(a.noteData);
+					}
+				}
+			});
+
+			for(h in 0...f.length)
+			{
+				var m = f[h];
+				m.kill();
+				notes.remove(m, true);
+				m.destroy();
+			}
+			possibleNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+
+			if(0 < possibleNotes.length)
+			{
+				//var h = 0;
+				//var m = pressArray.length;
+				/*while(h < m)
+				{
+					var n = h++;
+					if(pressArray[n] && ignoreList.contains(n) && !FlxG.save.data.skillIssue){ clicks.push(time); badNoteCheck(); }
+				}*/
+				for(hb in 0...possibleNotes.length)
+				{
+					var mb = possibleNotes[hb];
+					if(pressArray[mb.noteData])
+					{
+						clicks.push(time);
+						goodNoteHit(mb);
+					} 
+				}
+			}
+			else if(!FlxG.save.data.skillIssue)
+			{
+				badNoteCheck();
+				clicks.push(time);
+			}
+				
+					
+
+
+
+			/*boyfriend.holdTimer = 0;
 
 			var possibleNotes:Array<Note> = [];
 
@@ -3260,20 +3413,29 @@ class PlayState extends MusicBeatState
 			{
 				badNoteCheck();
 				clicks.push(time);
-			}
+			}*/
 		}
 
-		if (holdArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
+		
+
+		if(!FlxG.save.data.botAutoPlay)
 		{
-			notes.forEachAlive(function(daNote:Note)
-				{
-					if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData] && daNote.alpha != 0.1)
+			playerStrums.forEach(function(spr:Sprite)
+			{
+				if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm')
+						spr.animation.play('pressed');
+					if (!holdArray[spr.ID])
+						spr.animation.play('static');
+		 
+					if (spr.animation.curAnim.name == 'confirm' && !curStage.startsWith('school'))
 					{
-						
-						goodNoteHit(daNote);
+						spr.centerOffsets();
+						spr.offset.x -= 13;
+						spr.offset.y -= 13;
 					}
-					
-				});
+					else
+						spr.centerOffsets();
+			});
 		}
 
 		/*if (boyfriend.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!holdArray.contains(true) || FlxG.save.data.botAutoPlay))
@@ -3281,7 +3443,7 @@ class PlayState extends MusicBeatState
 					if (boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && boyfriend.animation.curAnim.curFrame >= 10 && boyfriend.animation.curAnim.name != "spinMic" || (boyfriend.animation.curAnim.name == "spinMic" && boyfriend.animation.curAnim.finished))
 						boyfriend.dance();
 				}*/
-
+		// bot auto play shit
 		notes.forEachAlive(function(daNote:Note)
 		{
 			if (FlxG.save.data.downscroll && daNote.y > strumLine.y || !FlxG.save.data.downscroll && daNote.y < strumLine.y)
@@ -3349,25 +3511,7 @@ class PlayState extends MusicBeatState
 				boyfriend.dance();
 		}*/
 
-		if(!FlxG.save.data.botAutoPlay)
-		{
-			playerStrums.forEach(function(spr:Sprite)
-			{
-				if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm')
-						spr.animation.play('pressed');
-					if (!holdArray[spr.ID])
-						spr.animation.play('static');
-		 
-					if (spr.animation.curAnim.name == 'confirm' && !curStage.startsWith('school'))
-					{
-						spr.centerOffsets();
-						spr.offset.x -= 13;
-						spr.offset.y -= 13;
-					}
-					else
-						spr.centerOffsets();
-			});
-		}
+		
 		
 	}
 
@@ -3672,7 +3816,6 @@ class PlayState extends MusicBeatState
 			case 'blammed':
 				if(curStep >= 512 && curStep < 768)
 				{
-					chromOn = true;
 					if(curStep >= 618 && curStep < 640)
 					{
 						cameraBeatSpeed = 1;
@@ -3691,7 +3834,6 @@ class PlayState extends MusicBeatState
 				}
 				else
 				{
-					chromOn = false;
 					cameraBeatSpeed = 4;
 					cameraBeatZoom = 0.025 * 1;
 				}
@@ -3723,27 +3865,6 @@ class PlayState extends MusicBeatState
 						FlxTween.tween(centralDudes, {y: centralDudes.y + 500}, Conductor.crochet / 1000, {ease: FlxEase.quadInOut});
 						FlxTween.tween(frontDudes, {y: frontDudes.y + 500}, Conductor.crochet / 1000, {ease: FlxEase.quadInOut});
 				}
-			case 'roses':
-
-				// im actually using beats here so im multiplying it by 4 lol
-				if(curStep >= 112 * 4 && curStep < 128 * 4)
-				{
-					chromOn = true;
-				}
-				else if(curStep >= 160 * 4 && curStep < 176 * 4)
-				{
-					chromOn = true;
-				}
-				else
-				{
-					chromOn = false;
-				}
-
-			case 'milf':
-				if(curStep >= 168 * 4 && curStep < 200 * 4)
-					chromOn = true;
-				else
-					chromOn = false;
 			/* 
 
 			// example
@@ -3858,28 +3979,6 @@ class PlayState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-
-		if(FlxG.save.data.shadersOn)
-		{
-			if (curBeat >= 0 && !shadersLoaded)
-			{
-				shadersLoaded = true;
-
-				filters.push(Shaders.chromaticAberration);
-				camfilters.push(Shaders.chromaticAberration);
-
-				filters.push(Shaders.grayScale);
-				camfilters.push(Shaders.grayScale);
-
-				filters.push(Shaders.invert);
-				camfilters.push(Shaders.invert);
-
-				filters.push(Shaders.pixelate);
-				filters.push(Shaders.vignette);
-
-			}
-		}
-
 		if (generatedMusic)
 		{
 			notes.sort(FlxSort.byY, FlxSort.DESCENDING);
@@ -3914,7 +4013,7 @@ class PlayState extends MusicBeatState
 		// FlxG.log.add('change bpm' + SONG.notes[Std.int(curStep / 16)].changeBPM);
 		wiggleShit.update(Conductor.crochet);
 
-		// HARDCODING FOR MILF ZOOMS!
+		// HARDCODING FOR MILF ZOOMS! 
 		if (curSong.toLowerCase() == 'milf' && curBeat >= 168 && curBeat < 200 && camZooming && FlxG.camera.zoom < 1.35)
 		{
 			FlxG.camera.zoom += cameraBeatZoom;

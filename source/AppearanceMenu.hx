@@ -161,7 +161,6 @@ class AppearanceMenu extends MusicBeatState
     public override function update(elapsed:Float)
     {
         super.update(elapsed);
-        FlxG.camera.followLerp = CoolUtil.camLerpShit(0.06);
         rightArrow.screenCenter(Y);
         leftArrow.screenCenter(Y);
         leftArrow.y -= 40;

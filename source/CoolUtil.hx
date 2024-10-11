@@ -96,6 +96,11 @@ class CoolUtil
 	{
 		return a + CoolUtil.camLerpShit(c) * (b - a);
 	}
+	public static function newCamLerp(cam:flixel.FlxCamera, target:flixel.FlxObject, lerp:Float = 1)
+	{
+		cam.scroll.x = FlxMath.lerp(cam.scroll.x, target.x - FlxG.width / 2, lerp);
+		cam.scroll.y = FlxMath.lerp(cam.scroll.y, target.y - FlxG.height/ 2, lerp);
+	}
 }
 class PreloadingState extends MusicBeatState
 {

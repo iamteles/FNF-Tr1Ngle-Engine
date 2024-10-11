@@ -1,5 +1,6 @@
 package;
 
+import haxe.Constraints.Function;
 import Conductor.BPMChangeEvent;
 import EventsSystemSection.SwagEventsSystemSection;
 import EventSystemChart.SwagEventSystemChart;
@@ -21,7 +22,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
@@ -101,7 +102,7 @@ class EventsEditorState extends MusicBeatState
 		scrollBarLine = new Sprite(0, 0).makeGraphics(20, 1, FlxColor.BLUE);
 		add(scrollBarLine);
 
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 4, GRID_SIZE * 16);
+		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 6, GRID_SIZE * 16);
 		add(gridBG);
 		gridBG.screenCenter();
 
@@ -120,7 +121,7 @@ class EventsEditorState extends MusicBeatState
 		}
 
 		FlxG.mouse.visible = true;
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('tr1ngle-engine', 'teles');
 
 		tempBpm = PlayState.SONG.bpm;
 
@@ -138,7 +139,7 @@ class EventsEditorState extends MusicBeatState
 		bpmTxt.scrollFactor.set();
 		add(bpmTxt);
 
-		strumLine = new Sprite(0, 50).makeGraphics(GRID_SIZE * 4, 4, FlxColor.BLUE);
+		strumLine = new Sprite(0, 50).makeGraphics(GRID_SIZE * 6, 4, FlxColor.BLUE);
 		strumLine.screenCenter(X);
 		add(strumLine);
 
@@ -332,40 +333,22 @@ class EventsEditorState extends MusicBeatState
 	var noteInfoText:FlxText;
 	var noteInfoBG:Sprite;
 
-	var curSelectedEvent:String = "changeDadCharacter";
-	var curEventArgs:Array<Dynamic> = [0, 0, 0];
+	var curSelectedEvent:String = "changeCharacter";
+	var curEventArgs:Array<Dynamic> = [];
 	public static var eventTypes:Array<String> = 
 	[
-		"changeDadCharacter", 
-		"changeBFCharacter", 
-		"chromaticAberrations", 
-		"vignette", 
-		"changeCameraBeat", 
-		"changeZoom", 
-		"changeRotationHUD",
-		"changeRotationGame",
-		"changeRotation",
-		"playBFAnim", 
-		"playDadAnim", 
-		"playGFAnim", 
-		"shakeCamera", 
-		"pointAtGF", 
-		"grayScale", 
-		"invertColor", 
-		"pixelate", 
-		"zoomCam", 
-		"rotateCamHUD", 
-		"rotateCamGame",
-		"rotateCam",
-		"wavyStrumLine", 
-		"countdown", 
-		"flashCamera",
-		"changeScrollSpeed",
-		"cameraPoint",
-		"callFunction"
+		"ChangeChar",
+		"PlayCharAnim",
+		"Shader",
+		"Camera",
+		"Countdown",
+		"WavyStrumLine",
+		"ChangeScrollSpeed",
+		"CameraBeat",
+		"CallFunc"
 	];
 
-	public static var oldEventTypes:Array<String> =  // DO NOT CHANGE
+	public static var oldEventTypes:Array<String> =  // DO NOT CHANGE (thats from 1.7.0 beta)
 	[
 		"changeDadCharacter", 
 		"changeBFCharacter", 
@@ -388,93 +371,21 @@ class EventsEditorState extends MusicBeatState
 		"callFunction"
 	];
 
-	var arg0NS:FlxUINumericStepper;
-	var arg1NS:FlxUINumericStepper;
-	var arg2NS:FlxUINumericStepper;
-
-	var arg0DD:FlxUIDropDownMenu;
-	var arg1DD:FlxUIDropDownMenu;
-	var arg2DD:FlxUIDropDownMenu;
-
-	var arg0Label:FlxText;
-	var arg1Label:FlxText;
-	var arg2Label:FlxText;
-
 	var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
 	var boolA:Array<String> = ["DISABLE", "ENABLE"];
-	
+	var eventsDropDown:FlxUIDropDownMenu;
 	function addNoteUI():Void
 	{
 		var tab_group_note = new FlxUI(null, UI_box);
 		tab_group_note.name = 'Note';
-
 		
-		arg0NS = new FlxUINumericStepper(10, 50);
-		arg0NS.name = 'arg0NS';
-		arg1NS = new FlxUINumericStepper(10, 70);
-		arg1NS.name = 'arg1NS';
-		arg2NS = new FlxUINumericStepper(10, 90);
-		arg2NS.name = 'arg2NS';
-		
-		arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, true));
-		arg0DD.selectedLabel = "FALSE";
-		
-		arg1DD = new FlxUIDropDownMenu(140, 70, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, true));
-		arg1DD.selectedLabel = "FALSE";
-		
-		arg2DD = new FlxUIDropDownMenu(140, 90, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, true));
-		arg2DD.selectedLabel = "FALSE";
-		
-		arg0Label = new FlxText(75, 50, 0, "");
-		arg1Label = new FlxText(75, 70, 0, "");
-		arg2Label = new FlxText(75, 90, 0, "");
-		
-		var eventsDropDown = new FlxUIDropDownMenu(10, 10, FlxUIDropDownMenu.makeStrIdLabelArray(eventTypes, true), function(event:String)
+		eventsDropDown = new FlxUIDropDownMenu(10, 10, FlxUIDropDownMenu.makeStrIdLabelArray(eventTypes, true), function(event:String)
 		{
-			
 			curSelectedEvent = eventTypes[Std.parseInt(event)];
-			
-			curEventArgs = [0, 0, 0];
-			
 			updateNoteUI();
 		});
 		
-		arg0DD.visible = false;
-		arg1DD.visible = false;
-		arg2DD.visible = false;
-		
-		arg0NS.visible = false;
-		arg1NS.visible = false;
-		arg2NS.visible = false;
-		
-		arg0DD.alpha = 0;
-		arg1DD.alpha = 0;
-		arg2DD.alpha = 0;
-		
-		arg0NS.alpha = 0;
-		arg1NS.alpha = 0;
-		arg2NS.alpha = 0;
-		
-
-		
 		eventsDropDown.selectedLabel = curSelectedEvent;
-		
-
-		tab_group_note.add(arg0DD);
-		tab_group_note.add(arg1DD);
-		tab_group_note.add(arg2DD);
-		
-		tab_group_note.add(arg0NS);
-		tab_group_note.add(arg1NS);
-		tab_group_note.add(arg2NS);
-		
-
-		
-		tab_group_note.add(arg0Label);
-		tab_group_note.add(arg1Label);
-		tab_group_note.add(arg2Label);
-		
-		tab_group_note.add(eventsDropDown);
 		
 		UI_box.addGroup(tab_group_note);
 		
@@ -567,26 +478,15 @@ class EventsEditorState extends MusicBeatState
 		{
 			var nums:FlxUINumericStepper = cast sender;
 			var wname = nums.name;
-			if (wname == 'arg0NS')
+			if (wname.startsWith('arg'))
 			{
-				curEventArgs[0] = nums.value;
-				updateGrid();
-			}
-			else if (wname == 'arg1NS')
-			{
-				curEventArgs[1] = nums.value;
-				updateGrid();
-			}
-			else if (wname == 'arg2NS')
-			{
-				curEventArgs[2] = nums.value;
+				var ind = Std.parseInt(wname.replace("arg", ""));
+				resizeArgs(ind + 1);
+				curEventArgs[ind] = nums.value;
 				updateGrid();
 			}
 			FlxG.log.add(wname);
-			
 		}
-
-		// FlxG.log.add(id + " WEED " + sender + " WEED " + data + " WEED " + params);
 	}
 
 	var updatedSection:Bool = false;
@@ -688,8 +588,13 @@ class EventsEditorState extends MusicBeatState
 				{
 					noteInfoBG.visible = true;
 					noteInfoText.visible = true;
-					noteInfoText.text = "Event Type: " + note.eventType + "\nArg0: " + note.eventArgs[0] + "\nArg1: " + note.eventArgs[1] + "\nArg2: " + note.eventArgs[2] + "\n";
-					noteInfoText.y = FlxG.mouse.y - GRID_SIZE;
+					noteInfoText.text = "Event Type: " + note.eventType;
+					for( argI in 0...note.eventArgs.length )
+					{
+						noteInfoText.text += "\nArg" + argI + ":" + note.eventArgs[argI];
+					}
+					noteInfoText.text += "\n";
+					noteInfoText.y = FlxG.mouse.y - noteInfoText.height;
 					noteInfoText.x = FlxG.mouse.x;
 					noteInfoBG.x = noteInfoText.x - 5;
 					noteInfoBG.y = noteInfoText.y - 5;
@@ -1008,440 +913,635 @@ class EventsEditorState extends MusicBeatState
 
 	
 
+	function resizeArgs(len:Int = 1)
+	{
+		if(curEventArgs.length <= len)
+			curEventArgs.resize(len);
+	}
+	var cameraEventsHud:Array<String> = 
+	[
+		"Change Zoom",
+		"Change Rotation",
+		"Zoom",
+		"Rotate",
+		"Flash",
+		"Shake"
+	];
+	var cameraEventsGame:Array<String> = 
+	[
+		"Change Zoom",
+		"Change Rotation",
+		"Zoom",
+		"Rotate",
+		"Flash",
+		"Point At GF",
+		"Point",
+		"Shake"
+	];
+	var cameraEventsBoth:Array<String> = 
+	[
+		"Change Zoom",
+		"Change Rotation",
+		"Zoom",
+		"Rotate",
+		"Flash",
+		"Point At GF [Game]",
+		"Point [Game]",
+		"Shake"
+	];
+	
+	var cDD:FlxUIDropDownMenu;
+	var cEDD:FlxUIDropDownMenu;
 
+	var fxType:FlxUIDropDownMenu;
+	var easeDur:FlxUINumericStepper;
+	var easeType:FlxUIDropDownMenu;
 	function updateNoteUI():Void
 	{
+		curEventArgs = [];
+		UI_box.getTabGroup("Note").clear();
 		
-		arg0DD.visible = false;
-		arg1DD.visible = false;
-		arg2DD.visible = false;
-		arg0NS.visible = false;
-		arg1NS.visible = false;
-		arg2NS.visible = false;
-		
-
-		
-		arg0DD.alpha = 0;
-		arg1DD.alpha = 0;
-		arg2DD.alpha = 0;
-		arg0NS.alpha = 0;
-		arg1NS.alpha = 0;
-		arg2NS.alpha = 0;
-		
-
-		
-
-		arg0Label.text = "";
-		arg1Label.text = "";
-		arg2Label.text = "";
-		
-
-		
-		//UI_box.getTabGroup("Note").remove(arg0NS);
-		//UI_box.getTabGroup("Note").remove(arg1NS);
-		//UI_box.getTabGroup("Note").remove(arg2NS);
-		//UI_box.getTabGroup("Note").remove(arg0DD);
-		//UI_box.getTabGroup("Note").remove(arg1DD);
-		//UI_box.getTabGroup("Note").remove(arg2DD);
 		switch(curSelectedEvent)
 		{
-			case "changeDadCharacter" | "changeBFCharacter": // changing characters
-				
-				trace("a");
-				arg0Label.text = "Char";
-				arg1Label.text = "X Spawn Offset";
-				arg2Label.text = "Y Spawn Offset";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(characters, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-				});
-				arg0DD.selectedLabel = curEventArgs[0];
-				curEventArgs[0] = characters[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 1, 0, -2000, 2000, 0);
-				arg1NS.value = 0;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
-				curEventArgs[1] = arg1NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg1NS);
-				UI_box.getTabGroup("Note").remove(arg2NS);
-				arg2NS = new FlxUINumericStepper(10, 90, 1, 0, -2000, 2000, 0);
-				arg2NS.value = 0;
-				arg2NS.name = 'arg2NS';
-				arg2NS.visible = true;
-				arg2NS.alpha = 1;
-				curEventArgs[2] = arg2NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg2NS);
-			case "chromaticAberrations": // chromatic aberrations
-				trace("a");
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				arg0DD.selectedLabel = curEventArgs[0];
-				curEventArgs[0] = boolA[0];
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "vignette": // vignette
-				trace("a");
-				arg1Label.text = "Radius";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				curEventArgs[0] = boolA[0];
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 0.05, 0.05, 0.05, 1, 2);
-				arg1NS.value = 0.1;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
-				curEventArgs[1] = arg1NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg1NS);
-			case "changeCameraBeat": // cam beat
-				trace("a");
-				arg0Label.text = "Camera Beat Zoom";
-				arg1Label.text = "Camera Beat Speed";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 1, 1, 8, 0);
+			case "CameraBeat":
+				resizeArgs(2);
+				var arg0Label = new FlxText(75, 50, 0, "Camera Beat Zoom");
+				var arg1Label = new FlxText(75, 70, 0, "Camera Beat Speed");
+				UI_box.getTabGroup("Note").add(arg0Label);
+				UI_box.getTabGroup("Note").add(arg1Label);
+
+				var arg0NS = new FlxUINumericStepper(10, 50, 1, 1, 1, 8, 0);
 				arg0NS.value = 1;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
+				arg0NS.name = 'arg0';
 				curEventArgs[0] = arg0NS.value;
-				
 				UI_box.getTabGroup("Note").add(arg0NS);
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 1, 4, 1, 16, 0);
+
+				var arg1NS = new FlxUINumericStepper(10, 70, 1, 4, 1, 16, 0);
 				arg1NS.value = 4;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
-				curEventArgs[1] = arg1NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg1NS);
-			case "changeZoom": // change zoom
-				arg0Label.text = "New Zoom Value";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 0.05, 0.9, 0, 2, 2);
-				arg0NS.value = 0.9;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "changeRotationHUD":
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 1);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "changeRotationGame":
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 1);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "changeRotation":
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 1);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "playBFAnim": // playing anims for bf
-				arg0Label.text = "Anim";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(Character.getCharacterAnimsList(PlayState.SONG.player1), false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				curEventArgs[0] = "spinMic";
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "playDadAnim": // playing anims for dad
-				arg0Label.text = "Anim";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(Character.getCharacterAnimsList(PlayState.SONG.player2), false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				curEventArgs[0] = "spinMic";
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "playGFAnim": // playing anims for gf
-				arg0Label.text = "Anim";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(Character.getCharacterAnimsList("gf"), false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				curEventArgs[0] = "cheer";
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "shakeCamera": // shaking camera
-				arg0Label.text = "Intensity of Shake";
-				arg1Label.text = "Time";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 0.05, 1, 0, 10, 2); // intensity
-				arg0NS.value = 1;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 0.05, 1, 0, 10, 2); // time
-				arg1NS.value = 1;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
+				arg1NS.name = 'arg1';
 				curEventArgs[1] = arg1NS.value;
 				UI_box.getTabGroup("Note").add(arg1NS);
-			case "flashCamera":
-				arg0Label.text = "Duration";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 0.1, 0.5, 0, 10, 2);
-				arg0NS.value = 0.5;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "pointAtGF": // point at gf
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				curEventArgs[0] = boolA[0];
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "changeScrollSpeed":
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 0.1, FlxMath.roundDecimal(PlayState.SONG.speed, 2), 0.1, 100, 2);
-				arg0NS.value = FlxMath.roundDecimal(PlayState.SONG.speed, 2);
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "cameraPoint":
-				arg1Label.text = "X";
-				arg2Label.text = "Y";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-				});
-				curEventArgs[0] = boolA[0];
-				arg0DD.selectedLabel = curEventArgs[0];
-				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
+			case "Shader":
+				resizeArgs(4); // 0 - effect; 1 - easing duration; 2 - easing type; 3+ - effect args
+				easeDur = new FlxUINumericStepper(10, UI_box.height - 40, 0.1, 0.5, 0, 99999, 2);
+				easeDur.value = 0.5;
+				easeDur.name = 'arg1';
+				curEventArgs[1] = easeDur.value;
 
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 0.5, 0, -2000, 2000, 2); // X
-				arg1NS.value = 1;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
-				curEventArgs[1] = arg1NS.value;
-				UI_box.getTabGroup("Note").add(arg1NS);
+				UI_box.getTabGroup("Note").add(easeDur);
+				easeType = new FlxUIDropDownMenu(140, UI_box.height - 60, FlxUIDropDownMenu.makeStrIdLabelArray(Shaders.easings, false), function(value:String)
+				{
+					curEventArgs[2] = value;
+				});
+				curEventArgs[2] = "linear";
+				easeType.selectedLabel = curEventArgs[2];
+				UI_box.getTabGroup("Note").add(easeType);
 
-				UI_box.getTabGroup("Note").remove(arg2NS);
-				arg2NS = new FlxUINumericStepper(10, 90, 0.5, 0, -2000, 2000, 2); // Y
-				arg2NS.value = 1;
-				arg2NS.name = 'arg2NS';
-				arg2NS.visible = true;
-				arg2NS.alpha = 1;
-				curEventArgs[2] = arg2NS.value;
-				UI_box.getTabGroup("Note").add(arg2NS);
+				fxType = new FlxUIDropDownMenu(140, 90, FlxUIDropDownMenu.makeStrIdLabelArray(Shaders.effects, false), function(value:String)
+				{
+					var fx:String = value;
+					
+					curEventArgs = [];
+					resizeArgs(4); // 0 - effect; 1 - easing duration; 2 - easing type; 3+ - effect args
+					curEventArgs[0] = fx;
+					curEventArgs[1] = easeDur.value;
+					curEventArgs[2] = easeType.selectedLabel;
+					UI_box.getTabGroup("Note").forEach(function(a:FlxSprite){if(a != fxType && a != easeDur && a != easeType && a != eventsDropDown) UI_box.getTabGroup("Note").remove(a, false);});
+					
+					switch(fx)
+					{
+						case "Chromatic":
+							resizeArgs(3 + 3); // offset 3 because shader global args
 
-			case "grayScale": // grayScale
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
+							var arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(["Not Random", "Random"], false), function(value:String)
+							{
+								curEventArgs[3] = value;
+							});
+							curEventArgs[3] = "Not Random";
+							arg0DD.selectedLabel = curEventArgs[3];
+							UI_box.getTabGroup("Note").add(arg0DD);
+
+							var label = new FlxText(75, 50, 0, "X");
+							UI_box.getTabGroup("Note").add(label);
+
+							var label2 = new FlxText(75, 70, 0, "Y");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.1, 0, -10, 10, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg4';
+							curEventArgs[4] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+							var arg1NS = new FlxUINumericStepper(10, 70, 0.1, 0, -10, 10, 2);
+							arg1NS.value = 0;
+							arg1NS.name = 'arg5';
+							curEventArgs[5] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+						case "Bulge":
+							resizeArgs(1 + 3);
+							var label = new FlxText(75, 50, 0, "Value");
+							UI_box.getTabGroup("Note").add(label);
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.01, 0, -1, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+						case "Glitch":
+							resizeArgs(4 + 3);
+
+							var label = new FlxText(75, 50, 0, "Max X Offset");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.01, 0, 0, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							var label2 = new FlxText(75, 70, 0, "Max Col Offset");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg1NS = new FlxUINumericStepper(10, 70, 0.01, 0, 0, 1, 2);
+							arg1NS.value = 0;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+
+							var label3 = new FlxText(75, 90, 0, "Slice Height");
+							UI_box.getTabGroup("Note").add(label3);
+
+							var arg2NS = new FlxUINumericStepper(10, 90, 0.01, 0, 0, 1, 2);
+							arg2NS.value = 0;
+							arg2NS.name = 'arg5';
+							curEventArgs[5] = arg2NS.value;
+							UI_box.getTabGroup("Note").add(arg2NS);
+
+							var label4 = new FlxText(75, 110, 0, "Interval (seconds)");
+							UI_box.getTabGroup("Note").add(label4);
+
+							var arg3NS = new FlxUINumericStepper(10, 110, 0.01, 0.1, 0, 5, 2);
+							arg3NS.value = 0.1;
+							arg3NS.name = 'arg6';
+							curEventArgs[6] = arg3NS.value;
+							UI_box.getTabGroup("Note").add(arg3NS);
+
+						case "Grayscale":
+							resizeArgs(5 + 3);
+							
+							var label = new FlxText(75, 50, 0, "Value");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.01, 0, 0, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							var label2 = new FlxText(75, 70, 0, "Tint R");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg1NS = new FlxUINumericStepper(10, 70, 1, 255, 0, 255, 0);
+							arg1NS.value = 255;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+
+							var label3 = new FlxText(75, 90, 0, "Tint G");
+							UI_box.getTabGroup("Note").add(label3);
+
+							var arg2NS = new FlxUINumericStepper(10, 90, 1, 255, 0, 255, 0);
+							arg2NS.value = 255;
+							arg2NS.name = 'arg5';
+							curEventArgs[5] = arg2NS.value;
+							UI_box.getTabGroup("Note").add(arg2NS);
+
+							var label4 = new FlxText(75, 110, 0, "Tint B");
+							UI_box.getTabGroup("Note").add(label4);
+
+							var arg3NS = new FlxUINumericStepper(10, 110, 1, 255, 0, 255, 0);
+							arg3NS.value = 255;
+							arg3NS.name = 'arg6';
+							curEventArgs[6] = arg3NS.value;
+							UI_box.getTabGroup("Note").add(arg3NS);
+
+							var useLum = new FlxUICheckBox(10, 130, null, null, "Use Lum");
+							useLum.callback = function()
+							{
+								curEventArgs[7] = useLum.checked;
+							};
+							curEventArgs[7] = false;
+							UI_box.getTabGroup("Note").add(useLum);
+
+						case "Hue":
+							resizeArgs(1 + 3);
+
+							var label = new FlxText(75, 50, 0, "HUE Angle");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+						case "Invert":
+							resizeArgs(4 + 3);
+
+							var label = new FlxText(75, 50, 0, "Value");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.01, 0, 0, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							var label2 = new FlxText(75, 70, 0, "Tint R");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg1NS = new FlxUINumericStepper(10, 70, 0.01, 1, 0, 1, 2);
+							arg1NS.value = 1;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+
+							var label3 = new FlxText(75, 90, 0, "Tint G");
+							UI_box.getTabGroup("Note").add(label3);
+
+							var arg2NS = new FlxUINumericStepper(10, 90, 0.01, 1, 0, 1, 2);
+							arg2NS.value = 1;
+							arg2NS.name = 'arg5';
+							curEventArgs[5] = arg2NS.value;
+							UI_box.getTabGroup("Note").add(arg2NS);
+
+							var label4 = new FlxText(75, 110, 0, "Tint B");
+							UI_box.getTabGroup("Note").add(label4);
+
+							var arg3NS = new FlxUINumericStepper(10, 110, 0.01, 1, 0, 1, 2);
+							arg3NS.value = 1;
+							arg3NS.name = 'arg6';
+							curEventArgs[6] = arg3NS.value;
+							UI_box.getTabGroup("Note").add(arg3NS);
+
+						case "LensCircle":
+							resizeArgs(9 + 3);
+							// strength
+							var label = new FlxText(75, 50, 0, "Strength");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.01, 0, 0, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							// x y
+							var label1 = new FlxText(75, 70, 0, "Origin X");
+							UI_box.getTabGroup("Note").add(label1);
+
+							var arg1NS = new FlxUINumericStepper(10, 70, 0.01, 0, -1, 1, 2);
+							arg1NS.value = 0;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+
+							var label2 = new FlxText(75, 90, 0, "Origin Y");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg2NS = new FlxUINumericStepper(10, 90, 0.01, 0, -1, 1, 2);
+							arg2NS.value = 0;
+							arg2NS.name = 'arg5';
+							curEventArgs[5] = arg2NS.value;
+							UI_box.getTabGroup("Note").add(arg2NS);
+
+							// start end
+
+							var label3 = new FlxText(75, 110, 0, "Start");
+							UI_box.getTabGroup("Note").add(label3);
+
+							var argsNS = new FlxUINumericStepper(10, 110, 0.01, 0, 0, 1, 2);
+							argsNS.value = 0;
+							argsNS.name = 'arg6';
+							curEventArgs[6] = argsNS.value;
+							UI_box.getTabGroup("Note").add(argsNS);
+
+							var label4 = new FlxText(75, 130, 0, "End");
+							UI_box.getTabGroup("Note").add(label4);
+
+							var argeNS = new FlxUINumericStepper(10, 130, 0.01, 0, 0, 1, 2);
+							argeNS.value = 0;
+							argeNS.name = 'arg7';
+							curEventArgs[7] = argeNS.value;
+							UI_box.getTabGroup("Note").add(argeNS);
+
+							// rgb
+
+							var label5 = new FlxText(75, 150, 0, "R");
+							UI_box.getTabGroup("Note").add(label5);
+
+							var argrNS = new FlxUINumericStepper(10, 150, 1, 0, 0, 255, 0);
+							argrNS.value = 0;
+							argrNS.name = 'arg8';
+							curEventArgs[8] = argrNS.value;
+							UI_box.getTabGroup("Note").add(argrNS);
+
+							var label6 = new FlxText(75, 170, 0, "G");
+							UI_box.getTabGroup("Note").add(label6);
+
+							var arggNS = new FlxUINumericStepper(10, 170, 1, 0, 0, 255, 0);
+							arggNS.value = 0;
+							arggNS.name = 'arg9';
+							curEventArgs[9] = arggNS.value;
+							UI_box.getTabGroup("Note").add(arggNS);
+
+							var label7 = new FlxText(75, 190, 0, "B");
+							UI_box.getTabGroup("Note").add(label7);
+
+							var argbNS = new FlxUINumericStepper(10, 190, 1, 0, 0, 255, 0);
+							argbNS.value = 0;
+							argbNS.name = 'arg10';
+							curEventArgs[10] = argbNS.value;
+							UI_box.getTabGroup("Note").add(argbNS);
+
+							var useR = new FlxUICheckBox(10, 210, null, null, "Use Ratio");
+							useR.callback = function()
+							{
+								curEventArgs[11] = useR.checked;
+							};
+							curEventArgs[11] = true;
+							useR.checked = true;
+							UI_box.getTabGroup("Note").add(useR);
+
+						case "Sepia":
+							resizeArgs(1 + 3);
+
+							var label = new FlxText(75, 50, 0, "Value");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.1, 0, 0, 1, 2);
+							arg0NS.value = 0;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+						case "SplitScreen":
+							resizeArgs(2 + 3);
+							
+							var label = new FlxText(75, 50, 0, "Col");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 0.1, 1, -16, 16, 2);
+							arg0NS.value = 1;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							var label2 = new FlxText(75, 70, 0, "Row");
+							UI_box.getTabGroup("Note").add(label2);
+
+							var arg1NS = new FlxUINumericStepper(10, 70, 0.1, 1, -16, 16, 2);
+							arg1NS.value = 1;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+						case "Pixelate":
+							resizeArgs(2 + 3);
+							
+							var label = new FlxText(75, 50, 0, "Width");
+							UI_box.getTabGroup("Note").add(label);
+
+							var arg0NS = new FlxUINumericStepper(10, 50, 1, 1, 16, 1280, 0);
+							arg0NS.value = 1280;
+							arg0NS.name = 'arg3';
+							curEventArgs[3] = arg0NS.value;
+							UI_box.getTabGroup("Note").add(arg0NS);
+
+							var label2 = new FlxText(75, 70, 0, "Height");
+							UI_box.getTabGroup("Note").add(label2);
+	
+							var arg1NS = new FlxUINumericStepper(10, 70, 1, 1, 9, 720, 0);
+							arg1NS.value = 720;
+							arg1NS.name = 'arg4';
+							curEventArgs[4] = arg1NS.value;
+							UI_box.getTabGroup("Note").add(arg1NS);
+					}
 					
 				});
-				curEventArgs[0] = boolA[0];
-				arg0DD.selectedLabel = curEventArgs[0];
+				UI_box.getTabGroup("Note").add(fxType);
+			case "Camera":
+				resizeArgs(3); // 0 - camera; 1 - camera event; 2+ - camera event args
+				// camera selection
 				
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "invertColor": // invert color
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
+				cDD = new FlxUIDropDownMenu(140, 90, FlxUIDropDownMenu.makeStrIdLabelArray(["Game", "HUD", "Both"], false), function(value:String)
 				{
-					curEventArgs[0] = value;
+					UI_box.getTabGroup("Note").forEach(function(a:FlxSprite){if(a != cDD && a != eventsDropDown) UI_box.getTabGroup("Note").remove(a, false);});
+					var cam:String = value;
+
+					// camera event selection
+					var cameraEvents:Array<String> = [];
+					switch(cam)
+					{
+						case "Game":
+							cameraEvents = cameraEventsGame;
+						case "HUD":
+							cameraEvents = cameraEventsHud;
+						case "Both":
+							cameraEvents = cameraEventsBoth;
+					}
 					
+					cEDD = new FlxUIDropDownMenu(140, 170, FlxUIDropDownMenu.makeStrIdLabelArray(cameraEvents, false), function(value2:String)
+					{
+						UI_box.getTabGroup("Note").forEach(function(a:FlxSprite){if(a != cDD && a != eventsDropDown) UI_box.getTabGroup("Note").remove(a, false);});
+						curEventArgs[0] = cam;
+						curEventArgs[1] = value2;
+						switch(value2)
+						{
+							case "Change Zoom":
+								resizeArgs(1 + 2); // offset 2 because camera and camera event indexes
+								var arg0Label = new FlxText(75, 50, 0, "New Zoom Value");
+								UI_box.getTabGroup("Note").add(arg0Label);
+								
+								var arg0NS = new FlxUINumericStepper(10, 50, 0.05, 0.9, 0, 2, 2);
+								arg0NS.value = 0.9;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								
+								UI_box.getTabGroup("Note").add(arg0NS);
+							case "Change Rotation":
+								resizeArgs(1 + 2);
+								var arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 1);
+								arg0NS.value = 0;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								
+								UI_box.getTabGroup("Note").add(arg0NS);
+							case "Zoom":
+								resizeArgs(1 + 2);
+								var arg0Label = new FlxText(75, 50, 0, "Zoom Value");
+								UI_box.getTabGroup("Note").add(arg0Label);
+
+								var arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -16, 16, 0);
+								arg0NS.value = 0;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								
+								UI_box.getTabGroup("Note").add(arg0NS);
+							case "Rotate":
+								resizeArgs(1 + 2);
+								var arg0Label = new FlxText(75, 50, 0, "Rotation Angle");
+								UI_box.getTabGroup("Note").add(arg0Label);
+
+								var arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -360, 360, 0);
+								arg0NS.value = 0;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								
+								UI_box.getTabGroup("Note").add(arg0NS);
+
+							case "Flash":
+								resizeArgs(4 + 2);
+
+								var arg0Label = new FlxText(75, 50, 0, "Duration");
+								UI_box.getTabGroup("Note").add(arg0Label);
+
+								var arg1Label = new FlxText(75, 70, 0, "R");
+								UI_box.getTabGroup("Note").add(arg1Label);
+								var arg2Label = new FlxText(75, 90, 0, "G");
+								UI_box.getTabGroup("Note").add(arg2Label);
+								var arg3Label = new FlxText(75, 110, 0, "B");
+								UI_box.getTabGroup("Note").add(arg3Label);
+
+								var arg0NS = new FlxUINumericStepper(10, 50, 0.1, 0.5, 0, 10, 2);
+								arg0NS.value = 0.5;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								UI_box.getTabGroup("Note").add(arg0NS);
+
+								var argrNS = new FlxUINumericStepper(10, 70, 1, 255, 0, 255, 0);
+								argrNS.value = 255;
+								argrNS.name = 'arg3';
+								curEventArgs[3] = argrNS.value;
+								UI_box.getTabGroup("Note").add(argrNS);
+
+								var arggNS = new FlxUINumericStepper(10, 90, 1, 255, 0, 255, 0);
+								arggNS.value = 255;
+								arggNS.name = 'arg4';
+								curEventArgs[4] = arggNS.value;
+								UI_box.getTabGroup("Note").add(arggNS);
+
+								var argbNS = new FlxUINumericStepper(10, 110, 1, 255, 0, 255, 0);
+								argbNS.value = 255;
+								argbNS.name = 'arg5';
+								curEventArgs[5] = argbNS.value;
+								UI_box.getTabGroup("Note").add(argbNS);
+							case "Shake":
+								resizeArgs(2 + 2);
+
+								var arg0Label = new FlxText(75, 50, 0, "Intensity");
+								var arg1Label = new FlxText(75, 70, 0, "Time");
+								UI_box.getTabGroup("Note").add(arg0Label);
+								UI_box.getTabGroup("Note").add(arg1Label);
+
+								var arg0NS = new FlxUINumericStepper(10, 50, 0.05, 1, 0, 10, 2); // intensity
+								arg0NS.value = 1;
+								arg0NS.name = 'arg2';
+								curEventArgs[2] = arg0NS.value;
+								UI_box.getTabGroup("Note").add(arg0NS);
+				
+								var arg1NS = new FlxUINumericStepper(10, 70, 0.05, 1, 0, 10, 2); // time
+								arg1NS.value = 1;
+								arg1NS.name = 'arg3';
+								curEventArgs[3] = arg1NS.value;
+								UI_box.getTabGroup("Note").add(arg1NS);
+
+							case "Point" | "Point [Game]":
+								resizeArgs(3 + 2);
+								var arg1Label = new FlxText(75, 70, 0, "X");
+								var arg2Label = new FlxText(75, 90, 0, "Y");
+								UI_box.getTabGroup("Note").add(arg1Label);
+								UI_box.getTabGroup("Note").add(arg2Label);
+								var arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
+								{
+									curEventArgs[2] = value;
+								});
+								curEventArgs[2] = boolA[0];
+								arg0DD.selectedLabel = curEventArgs[2];
+								UI_box.getTabGroup("Note").add(arg0DD);
+
+								var arg1NS = new FlxUINumericStepper(10, 70, 0.5, 0, -2000, 2000, 2); // X
+								arg1NS.value = 1;
+								arg1NS.name = 'arg3';
+								curEventArgs[3] = arg1NS.value;
+								UI_box.getTabGroup("Note").add(arg1NS);
+
+								var arg2NS = new FlxUINumericStepper(10, 90, 0.5, 0, -2000, 2000, 2); // Y
+								arg2NS.value = 1;
+								arg2NS.name = 'arg4';
+								curEventArgs[4] = arg2NS.value;
+								UI_box.getTabGroup("Note").add(arg2NS);
+
+							case "Point At GF" | "Point At GF [Game]":
+								resizeArgs(1 + 2);
+								var arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
+								{
+									curEventArgs[2] = value;
+								});
+								curEventArgs[2] = boolA[0];
+								arg0DD.selectedLabel = curEventArgs[2];
+								UI_box.getTabGroup("Note").add(arg0DD);
+						}
+						UI_box.getTabGroup("Note").add(cEDD);
+
+					});
+					UI_box.getTabGroup("Note").add(cEDD);
+
+
 				});
-				arg0DD.selectedLabel = curEventArgs[0];
-				curEventArgs[0] = boolA[0];
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "pixelate": // pixelate
-				arg1Label.text = "Pixel Size";
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-					
-				});
-				arg0DD.selectedLabel = curEventArgs[0];
-				curEventArgs[0] = boolA[0];
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-				UI_box.getTabGroup("Note").remove(arg1NS);
-				arg1NS = new FlxUINumericStepper(10, 70, 5, 80, 20, 120, 1);
-				arg1NS.value = 80;
-				arg1NS.name = 'arg1NS';
-				arg1NS.visible = true;
-				arg1NS.alpha = 1;
-					curEventArgs[1] = arg1NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg1NS);
-			case "zoomCam": // zoom
-				arg0Label.text = "Zoom Value";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -16, 16, 0);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "rotateCam": // rotate
-				arg0Label.text = "Rotation Angle";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -180, 180, 0);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "rotateCamGame": // rotate
-				arg0Label.text = "Rotation Angle";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -180, 180, 0);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "rotateCamHUD": // rotate
-				arg0Label.text = "Rotation Angle";
-				UI_box.getTabGroup("Note").remove(arg0NS);
-				arg0NS = new FlxUINumericStepper(10, 50, 1, 0, -180, 180, 0);
-				arg0NS.value = 0;
-				arg0NS.name = 'arg0NS';
-				arg0NS.visible = true;
-				arg0NS.alpha = 1;
-				curEventArgs[0] = arg0NS.value;
-				
-				UI_box.getTabGroup("Note").add(arg0NS);
-			case "wavyStrumLine": // wavy strum line
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
-				{
-					curEventArgs[0] = value;
-				});
-				arg0DD.selectedLabel = curEventArgs[0];
-				curEventArgs[0] = boolA[0];
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
-				UI_box.getTabGroup("Note").add(arg0DD);
-			case "countdown": // countdown
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(["Without Sound", "With Sound"], false), function(value:String)
+				UI_box.getTabGroup("Note").add(cDD);
+			case "Countdown":
+				resizeArgs(1);
+				var arg0DD:FlxUIDropDownMenu = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(["Without Sound", "With Sound"], false), function(value:String)
 				{
 					curEventArgs[0] = value;
 				});
 				arg0DD.selectedLabel = curEventArgs[0];
 				curEventArgs[0] = "Without Sound";
-				arg0DD.visible = true;
-				arg0DD.alpha = 1;
 				UI_box.getTabGroup("Note").add(arg0DD);
-			case "callFunction": // callFunction
-				UI_box.getTabGroup("Note").remove(arg0DD);
-				arg2Label.text = "this event basically calls\npublic static function from PlayState.hx\n\nyou need to put every function name\nin the functionsList array in PlayState.hx";
-				
-				arg0DD = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(PlayState.functionsList, false), function(value:String)
+			case "WavyStrumLine":
+				resizeArgs(1);
+				var arg0DD:FlxUIDropDownMenu = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(boolA, false), function(value:String)
+				{
+					curEventArgs[0] = value;
+				});
+				arg0DD.selectedLabel = curEventArgs[0];
+				curEventArgs[0] = boolA[0];
+				UI_box.getTabGroup("Note").add(arg0DD);
+			case "ChangeScrollSpeed":
+				resizeArgs(1);
+				var arg0NS:FlxUINumericStepper = new FlxUINumericStepper(10, 50, 0.1, FlxMath.roundDecimal(PlayState.SONG.speed, 2), 0.1, 100, 2);
+				arg0NS.value = FlxMath.roundDecimal(PlayState.SONG.speed, 2);
+				arg0NS.name = 'arg0';
+				curEventArgs[0] = arg0NS.value;
+				UI_box.getTabGroup("Note").add(arg0NS);
+			case "CallFunc":
+				resizeArgs(1);
+				var theh = new FlxText(75, 80, 0, "This event basically calls |public static function| from PlayState.hx\nExample is `testFunction`\n You have to create `public static function`\n and add its name to `functionsList` array.");
+				var arg0DD:FlxUIDropDownMenu = new FlxUIDropDownMenu(140, 50, FlxUIDropDownMenu.makeStrIdLabelArray(PlayState.functionsList, false), function(value:String)
 				{
 					curEventArgs[0] = value;
 				});
 				curEventArgs[0] = PlayState.functionsList[0];
-				arg0DD.selectedLabel = curEventArgs[0];
-				arg0DD.alpha = 1;
-
 				UI_box.getTabGroup("Note").add(arg0DD);
+				UI_box.getTabGroup("Note").add(theh);
 		}
-		//UI_box.getTabGroup("Note").add(arg0NS);
-		//UI_box.getTabGroup("Note").add(arg1NS);
-		//UI_box.getTabGroup("Note").add(arg2NS);
-		//UI_box.getTabGroup("Note").add(arg0DD);
-		//UI_box.getTabGroup("Note").add(arg1DD);
-		//UI_box.getTabGroup("Note").add(arg2DD);
+		eventsDropDown = new FlxUIDropDownMenu(10, 10, FlxUIDropDownMenu.makeStrIdLabelArray(eventTypes, true), function(event:String)
+		{
+			curSelectedEvent = eventTypes[Std.parseInt(event)];
+			updateNoteUI();
+		});
+		
+		eventsDropDown.selectedLabel = curSelectedEvent;
+		UI_box.getTabGroup("Note").add(eventsDropDown);
 	}
 	function updateScrollBar():Void
 	{
@@ -1502,7 +1602,7 @@ class EventsEditorState extends MusicBeatState
 			var daNoteEventTypeA = i[2];
 			var daNoteEventArgsA = i[3];
 
-			var note:Note = new Note(daStrumTime, daNoteInfo % 4, true);
+			var note:Note = new Note(daStrumTime, daNoteInfo % 6, true);
 			note.setGraphicSize(GRID_SIZE + 5, GRID_SIZE + 5);
 			note.updateHitbox();
 			note.x = Math.floor(daNoteInfo * GRID_SIZE) + gridBG.x;
@@ -1527,7 +1627,7 @@ class EventsEditorState extends MusicBeatState
 	{
 		for (i in _song.notes[curSection].sectionNotes)
 		{
-			if (FlxMath.roundDecimal(i[0] + Conductor.offset, 2) == note.strumTime && i[1] % 4 == note.noteData)
+			if (FlxMath.roundDecimal(i[0] + Conductor.offset, 2) == note.strumTime && i[1] % 6 == note.noteData)
 			{
 				FlxG.log.add('FOUND EVIL NUMBER');
 				_song.notes[curSection].sectionNotes.remove(i);

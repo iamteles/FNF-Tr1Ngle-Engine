@@ -86,8 +86,7 @@ class Character extends Sprite
 				frames = tex;
 				animation.addByIndices('singUP', 'GF Dancing Beat Hair blowing CAR', [0], "", 24, false);
 				animation.addByIndices('danceLeft', 'GF Dancing Beat Hair blowing CAR', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-				animation.addByIndices('danceRight', 'GF Dancing Beat Hair blowing CAR', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24,
-					false);
+				animation.addByIndices('danceRight', 'GF Dancing Beat Hair blowing CAR', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 				healthBarColor.setRGB(165, 0, 77, 255);
 				loadOffsetFile(curCharacter);
 
@@ -406,8 +405,6 @@ class Character extends Sprite
 				loadOffsetFile(curCharacter);
 
 				playAnim('idle');
-
-
 		}
 
 		dance();
@@ -423,8 +420,6 @@ class Character extends Sprite
 				var oldRight = animation.getByName('singRIGHT').frames;
 				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
 				animation.getByName('singLEFT').frames = oldRight;
-
-
 
 				// IF THEY HAVE MISS ANIMATIONS??
 				if (animation.getByName('singRIGHTmiss') != null)
@@ -477,7 +472,7 @@ class Character extends Sprite
 		}
 		else
 			holdTimer = 0;
-		if (holdTimer > Conductor.stepCrochet * 4 * 0.001)
+		if (holdTimer > Conductor.crochet / 1000)
 		{
 			if ((animation.curAnim.name.startsWith('sing') && animation.curAnim.finished) && animation.curAnim.name != "spinMic" || (animation.curAnim.name == "spinMic" && animation.curAnim.finished))
 				dance();
@@ -563,34 +558,37 @@ class Character extends Sprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if(animation.getByName(AnimName) == null && AnimName.startsWith("sing") && AnimName.endsWith("-alt"))
-			AnimName = AnimName.replace("-alt", "");
-		animation.play(AnimName, Force, Reversed, Frame);
-
-		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
+		if(animation.getByName(AnimName) != null)
 		{
-			offset.set(daOffset[0], daOffset[1]);
-		}
-		else
-			offset.set(0, 0);
-
-		
-
-		if (curCharacter == 'gf')
-		{
-			if (AnimName == 'singLEFT')
+			if(animation.getByName(AnimName) == null && AnimName.startsWith("sing") && AnimName.endsWith("-alt"))
+				AnimName = AnimName.replace("-alt", "");
+			animation.play(AnimName, Force, Reversed, Frame);
+	
+			var daOffset = animOffsets.get(AnimName);
+			if (animOffsets.exists(AnimName))
 			{
-				danced = true;
+				offset.set(daOffset[0], daOffset[1]);
 			}
-			else if (AnimName == 'singRIGHT')
+			else
+				offset.set(0, 0);
+	
+			
+	
+			if (curCharacter == 'gf')
 			{
-				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-			{
-				danced = !danced;
+				if (AnimName == 'singLEFT')
+				{
+					danced = true;
+				}
+				else if (AnimName == 'singRIGHT')
+				{
+					danced = false;
+				}
+	
+				if (AnimName == 'singUP' || AnimName == 'singDOWN')
+				{
+					danced = !danced;
+				}
 			}
 		}
 	}

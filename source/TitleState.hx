@@ -17,7 +17,7 @@ import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.system.ui.FlxSoundTray;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -63,7 +63,7 @@ class TitleState extends MusicBeatState
 		trace('NEWGROUNDS LOL');
 		#end
 
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('tr1ngle-engine', 'teles');
 
 		Highscore.load();
 
@@ -86,11 +86,15 @@ class TitleState extends MusicBeatState
 		 });
 		#end
 
+		// Ideally, you'd want the game to always run at 120 fps internally...
+		/*
 		if(FlxG.save.data.framerateDraw != null){
 			FlxG.updateFramerate = FlxG.save.data.framerateDraw;
 			FlxG.drawFramerate = FlxG.save.data.framerateDraw;
 		}
-			
+		*/
+		
+		FlxG.fixedTimestep = false;
 	}
 
 	var logoBl:Sprite;

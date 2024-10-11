@@ -19,7 +19,7 @@ class Main extends Sprite
 	var framerate:Int = 120; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
-	public static var engineVersion:String = "1.7.0";
+	public static var engineVersion:String = "1.7.5 [IN DEVELOPMENT]";
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 	public static function setupSaveData()
@@ -106,7 +106,7 @@ class Main extends Sprite
 		initialState = TitleState;
 		#end
 
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+		addChild(new FlxGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
 		
 
 			
