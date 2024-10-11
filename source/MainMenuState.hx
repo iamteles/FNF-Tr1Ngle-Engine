@@ -109,7 +109,7 @@ class MainMenuState extends MusicBeatState
 
 		
 
-		var versionShit:FlxText = new FlxText(5, FlxG.height - 36, 0, "Game version:" + Application.current.meta.get('version') , 12);
+		var versionShit:FlxText = new FlxText(5, FlxG.height - 36, 0, "Game version: 0.2.7.1" , 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
